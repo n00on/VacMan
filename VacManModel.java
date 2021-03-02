@@ -257,6 +257,8 @@ class RandomVirus extends Entity {
 					newDir = Direction.RIGHT;
 					break;
 				}
+				
+				// Hallöle
 				if (newDir != getDir().getOpposite() && newDir.arrayCheck(y, x)
 						&& map[y + newDir.Y][x + newDir.X].VALUE > Fields.GATE.VALUE) {
 					setNextDir(newDir);
