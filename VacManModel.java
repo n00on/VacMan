@@ -8,7 +8,7 @@ class VacManModel {
 	static final byte COLUMNS = 28;
 
 	private VacManView view;
-	
+
 	private Vac vacMan = new Vac();
 	private Entity[] virus = { new RandomVirus() };
 	private Fields[][] map = new Fields[ROWS][COLUMNS];
@@ -30,7 +30,7 @@ class VacManModel {
 		Fields g = Fields.GATE;
 		Fields b = Fields.BONUS;
 		Fields e = Fields.EMPTY;
-		
+
 		Fields[][] map = { { w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w },
 				{ w, b, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, b, w },
 				{ w, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, w },
@@ -118,7 +118,6 @@ abstract class Entity {
 	private byte y;
 	private boolean moving = false;
 
-	
 	public Entity(int xStart, int yStart) {
 		XSTART = (byte) xStart;
 		YSTART = (byte) yStart;
@@ -178,7 +177,7 @@ class Vac extends Entity {
 
 	private static final byte XSTART = 13;
 	private static final byte YSTART = 12;
-	
+
 	private byte lives = 3;
 
 	public Vac() {
@@ -259,6 +258,7 @@ class RandomVirus extends Entity {
 				}
 				
 				// Hallöle
+				// TODO fix game crash when 
 				if (newDir != getDir().getOpposite() && newDir.arrayCheck(y, x)
 						&& map[y + newDir.Y][x + newDir.X].VALUE > Fields.GATE.VALUE) {
 					setNextDir(newDir);
@@ -301,7 +301,7 @@ enum Direction {
 	final byte X;
 	/** y direction. */
 	final byte Y;
-
+//Kommentar
 	private Direction(int x, int y) {
 		X = (byte) x;
 		Y = (byte) y;
