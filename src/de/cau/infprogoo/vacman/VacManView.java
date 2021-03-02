@@ -7,6 +7,9 @@ import acm.graphics.GOval;
 import acm.graphics.GRect;
 import acm.util.JTFTools;
 
+// TODO implement LighHouse
+// TODO animations
+
 class VacManView extends GCompound {
 
 	static final int FIELD_OFFSET = 50;
@@ -50,6 +53,7 @@ class VacManView extends GCompound {
 				}
 			}
 		}
+		
 		Vac vMan = model.getVacMan();
 		Entity[] virus = model.getVirus();
 		add(vacMan, FIELD_OFFSET / 2 + FIELD_SIZE * vMan.getX(), FIELD_OFFSET + FIELD_SIZE * vMan.getY());
@@ -83,7 +87,7 @@ class VacManView extends GCompound {
 	}
 	
 	void updateScore() {
-
+		// TODO und initialisieren, Lebensanzeige
 	}
 
 	/** 
@@ -92,7 +96,7 @@ class VacManView extends GCompound {
 	 * @param x
 	 * @param y
 	 */
-	void updateMap(byte x, byte y) {
+	void removeDot(byte x, byte y) {
 		remove(fields[x][y]);
 	}
 
@@ -146,6 +150,7 @@ class VacBody extends GCompound {
 	}
 }
 
+// TODO Virus view while vulnerable
 class RandomVirusBody extends GCompound {
 	public RandomVirusBody() {
 		GOval head = new GOval(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);

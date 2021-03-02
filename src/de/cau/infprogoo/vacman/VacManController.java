@@ -16,13 +16,13 @@ class VacManController implements KeyListener {
 		if (keyCode == KeyEvent.VK_SPACE) {
 			model.pause();
 		} else if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP) {
-			model.setDirection(Direction.UP);
+			model.getVacMan().setNextDir(Direction.UP);
 		} else if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT) {
-			model.setDirection(Direction.LEFT);
+			model.getVacMan().setNextDir(Direction.LEFT);
 		} else if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN) {
-			model.setDirection(Direction.DOWN);
+			model.getVacMan().setNextDir(Direction.DOWN);
 		} else if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT) {
-			model.setDirection(Direction.RIGHT);
+			model.getVacMan().setNextDir(Direction.RIGHT);
 		}
 	}
 

@@ -2,13 +2,16 @@ package de.cau.infprogoo.vacman;
 
 import acm.util.RandomGenerator;
 
+// TODO:
+// GAME OVER, Level/Level, Tunnel
+
 class VacManModel {
 
 	static final byte ROWS = 14;
 	static final byte COLUMNS = 28;
 
 	private VacManView view;
-
+	
 	private Vac vacMan = new Vac();
 	private Entity[] virus = { new RandomVirus() };
 	private Fields[][] map = new Fields[ROWS][COLUMNS];
@@ -30,8 +33,9 @@ class VacManModel {
 		Fields g = Fields.GATE;
 		Fields b = Fields.BONUS;
 		Fields e = Fields.EMPTY;
-
-		Fields[][] map = { { w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w },
+		
+		Fields[][] map = { 
+				{ w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w },
 				{ w, b, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, b, w },
 				{ w, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, w },
 				{ w, d, w, w, w, d, d, w, w, d, w, w, e, w, w, e, w, w, d, w, w, d, d, w, w, w, d, w },
@@ -58,10 +62,6 @@ class VacManModel {
 
 	}
 
-	void setDirection(Direction dir) {
-		vacMan.setNextDir(dir);
-	}
-
 	Vac getVacMan() {
 		return vacMan;
 	}
@@ -79,17 +79,21 @@ class VacManModel {
 	}
 
 	void update() {
-		vacMan.update(map);
-		virus[0].update(map, vacMan.getX(), vacMan.getY());
+		vacMan.update(this);
+		for (Entity vir : virus) {
+			vir.update(this);
+		}
+		
 		byte x = vacMan.getX();
 		byte y = vacMan.getY();
 		if (map[y][x].VALUE >= Fields.DOT.VALUE) {
 			score += map[y][x].VALUE;
 			map[y][x] = Fields.EMPTY;
-			view.updateMap(y, x);
+			view.removeDot(y, x);
+			view.updateScore();
 			dotCounter--;
 
-			System.out.println(score);
+//			System.out.println(score);
 			if (dotCounter == 0) {
 				System.out.println("WON!");
 			}
@@ -118,6 +122,7 @@ abstract class Entity {
 	private byte y;
 	private boolean moving = false;
 
+	
 	public Entity(int xStart, int yStart) {
 		XSTART = (byte) xStart;
 		YSTART = (byte) yStart;
@@ -145,21 +150,20 @@ abstract class Entity {
 		return y;
 	}
 
-	void update(Fields[][] map, byte x, byte y) {
-		update(map);
-	}
-
-	void update(Fields[][] map) {
-		if (nextDir.arrayCheck(y, x) && map[y + nextDir.Y][x + nextDir.X].VALUE > Fields.GATE.VALUE) {
+	void update(VacManModel model) {
+		Fields[][] map = model.getMap();
+		if (nextDir.arrayCheck(y, x) && map[y + nextDir.Y][x + nextDir.X].VALUE >= Fields.EMPTY.VALUE) {
 			dir = nextDir;
 		}
-		if (dir.arrayCheck(y, x) && map[y + dir.Y][x + dir.X].VALUE > Fields.GATE.VALUE) {
+		if (dir.arrayCheck(y, x) && map[y + dir.Y][x + dir.X].VALUE >= Fields.EMPTY.VALUE) {
 			x += dir.X;
 			y += dir.Y;
 			moving = true;
 		} else {
 			moving = false;
 		}
+		
+		model.getVacMan().checkHit(model);
 	}
 
 	void update() {
@@ -177,7 +181,7 @@ class Vac extends Entity {
 
 	private static final byte XSTART = 13;
 	private static final byte YSTART = 12;
-
+	
 	private byte lives = 3;
 
 	public Vac() {
@@ -188,11 +192,23 @@ class Vac extends Entity {
 		return lives;
 	}
 
-	void update(Fields[][] map) {
-		super.update(map);
-
+	void update(VacManModel model) {
+		super.update(model);
+	}
+	
+	void checkHit(VacManModel model) {
+		for (Entity virus : model.getVirus()) {
+			if (getX() == virus.getX() && getY() == virus.getY()) {
+				System.out.println("HIT");
+				if (--lives == 0) {
+					System.out.println("GAME OVER");
+				}
+			}
+		}
 	}
 }
+
+// TODO implement virus algorithms
 
 //class Virus extends Entity {
 //
@@ -234,7 +250,8 @@ class RandomVirus extends Entity {
 		super(XSTART, YSTART);
 	}
 
-	void update(Fields[][] map, byte vacX, byte vacY) {
+	void update(VacManModel model) {
+		Fields[][] map = model.getMap();
 
 		if (isOut) {
 			RandomGenerator rgen = new RandomGenerator();
@@ -256,16 +273,13 @@ class RandomVirus extends Entity {
 					newDir = Direction.RIGHT;
 					break;
 				}
-				
-				// Hallöle
-				// TODO fix game crash when 
 				if (newDir != getDir().getOpposite() && newDir.arrayCheck(y, x)
 						&& map[y + newDir.Y][x + newDir.X].VALUE > Fields.GATE.VALUE) {
 					setNextDir(newDir);
 					break;
 				}
 			}
-			super.update(map);
+			super.update(model);
 		} else {
 			// If still in starting room, moves up.
 			setNextDir(Direction.UP);
@@ -301,7 +315,7 @@ enum Direction {
 	final byte X;
 	/** y direction. */
 	final byte Y;
-//Kommentar
+
 	private Direction(int x, int y) {
 		X = (byte) x;
 		Y = (byte) y;
