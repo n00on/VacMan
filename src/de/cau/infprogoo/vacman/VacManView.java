@@ -32,7 +32,22 @@ class VacManView extends GCompound {
 	 */
 	void draw(VacManModel model) {
 		removeAll();
-		Fields[][] map = model.getMap();
+		drawFields(model.getMap());
+		Vac vMan = model.getVacMan();
+		add(vacMan, FIELD_OFFSET / 2 + FIELD_SIZE * vMan.getX(), FIELD_OFFSET + FIELD_SIZE * vMan.getY());
+		
+		Entity[] virus = model.getVirus();
+		for (int i = 0; i < virus.length; i++) {
+			add(this.virus[i], FIELD_OFFSET / 2 + FIELD_SIZE * virus[i].getX(), FIELD_OFFSET + FIELD_SIZE * virus[i].getY());
+		}
+		
+		scoreDisplay = new GLabel("SCORE \n" + model.getScore());
+		scoreDisplay.setColor(Color.WHITE);
+		scoreDisplay.setFont("Default-20");
+		add(scoreDisplay, this.getWidth() - FIELD_SIZE, 25);
+	}
+	
+	void drawFields(Fields[][] map){
 		for (int x = 0; x < VacManModel.COLUMNS; x++) {
 			for (int y = 0; y < VacManModel.ROWS; y++) {
 				GCompound field = null;
@@ -57,20 +72,6 @@ class VacManView extends GCompound {
 				}
 			}
 		}
-		
-		Vac vMan = model.getVacMan();
-		add(vacMan, FIELD_OFFSET / 2 + FIELD_SIZE * vMan.getX(), FIELD_OFFSET + FIELD_SIZE * vMan.getY());
-		
-		Entity[] virus = model.getVirus();
-		for (int i = 0; i < virus.length; i++) {
-			add(this.virus[i], FIELD_OFFSET / 2 + FIELD_SIZE * virus[i].getX(), FIELD_OFFSET + FIELD_SIZE * virus[i].getY());
-		}
-		
-		scoreDisplay = new GLabel("SCORE \n" + model.getScore());
-		scoreDisplay.setColor(Color.WHITE);
-		scoreDisplay.setFont("Default-20");
-		add(scoreDisplay, this.getWidth() - FIELD_SIZE, 25);
-		
 	}
 
 	void update(VacManModel model, double ms) {
