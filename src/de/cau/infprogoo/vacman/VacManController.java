@@ -4,9 +4,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 class VacManController implements KeyListener {
-	
+
 	private VacManModel model;
-	
+
 	VacManController(VacManModel model) {
 		this.model = model;
 	}
@@ -23,6 +23,9 @@ class VacManController implements KeyListener {
 			model.getVacMan().setNextDir(Direction.DOWN);
 		} else if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT) {
 			model.getVacMan().setNextDir(Direction.RIGHT);
+		} // restart game button
+		else if (keyCode == KeyEvent.VK_R) {
+			model.reset();
 		}
 	}
 

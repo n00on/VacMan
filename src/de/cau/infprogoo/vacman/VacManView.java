@@ -31,7 +31,7 @@ class VacManView extends GCompound {
 	 * @param model
 	 */
 	void draw(VacManModel model) {
-		
+		removeAll();
 		Fields[][] map = model.getMap();
 		for (int x = 0; x < VacManModel.COLUMNS; x++) {
 			for (int y = 0; y < VacManModel.ROWS; y++) {

@@ -9,11 +9,12 @@ class VacManModel {
 
 	static final byte ROWS = 14;
 	static final byte COLUMNS = 28;
-
+	static final byte VIRUSES = 1; //number of Viruses
+	
 	private VacManView view;
 	
 	private Vac vacMan = new Vac();
-	private Entity[] virus = { new RandomVirus() };
+	private Entity[] virus = new Entity[VIRUSES];
 	private Fields[][] map = new Fields[ROWS][COLUMNS];
 
 	private boolean paused = false;
@@ -22,8 +23,21 @@ class VacManModel {
 
 	VacManModel(VacManView view) {
 		this.view = view;
+		reset();
+	}
+	
+	//reset gamestate
+	void reset(){
+		paused = true;
+		vacMan = new Vac();
+		dotCounter = 0;
+		score = 0;
+		for (int i = 0; i < VIRUSES; i++) {
+			virus[i] = new RandomVirus();
+		}
 		initMap();
 		view.draw(this);
+		paused = false;
 	}
 
 	private void initMap() {
@@ -82,8 +96,9 @@ class VacManModel {
 		paused = !paused;
 	}
 
+	//updates the entire game
 	void update() {
-		
+		if (!paused) {
 		byte x = vacMan.getX();
 		byte y = vacMan.getY();
 		
@@ -102,7 +117,7 @@ class VacManModel {
 		
 		for (Entity vir : virus) {
 			vir.update(this);
-		}
+		}}
 	}
 
 	Fields[][] getMap() {
