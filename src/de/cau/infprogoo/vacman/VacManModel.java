@@ -69,6 +69,10 @@ class VacManModel {
 	Entity[] getVirus() {
 		return virus;
 	}
+	
+	int getScore() {
+		return score;
+	}
 
 	boolean isPaused() {
 		return paused;
@@ -79,24 +83,25 @@ class VacManModel {
 	}
 
 	void update() {
-		vacMan.update(this);
-		for (Entity vir : virus) {
-			vir.update(this);
-		}
 		
 		byte x = vacMan.getX();
 		byte y = vacMan.getY();
+		
 		if (map[y][x].VALUE >= Fields.DOT.VALUE) {
 			score += map[y][x].VALUE;
 			map[y][x] = Fields.EMPTY;
-			view.removeDot(y, x);
-			view.updateScore();
 			dotCounter--;
 
-//			System.out.println(score);
 			if (dotCounter == 0) {
+				paused = true;
 				System.out.println("WON!");
 			}
+		}
+		
+		vacMan.update(this);
+		
+		for (Entity vir : virus) {
+			vir.update(this);
 		}
 	}
 
@@ -199,6 +204,7 @@ class Vac extends Entity {
 	void checkHit(VacManModel model) {
 		for (Entity virus : model.getVirus()) {
 			if (getX() == virus.getX() && getY() == virus.getY()) {
+				model.pause();
 				System.out.println("HIT");
 				if (--lives == 0) {
 					System.out.println("GAME OVER");

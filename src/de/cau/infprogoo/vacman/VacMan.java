@@ -33,7 +33,7 @@ public class VacMan extends GraphicsProgram {
 			} else {
 				double startTime = System.nanoTime() / 1e6;
 				model.update();
-				view.animate(model, startTime + MS_PER_UPDATE - System.nanoTime() / 1e6);
+				view.update(model, startTime + MS_PER_UPDATE - System.nanoTime() / 1e6);
 			}
 		}
 	}
