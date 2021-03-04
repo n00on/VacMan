@@ -129,7 +129,8 @@ class VacManModel {
 		System.out.println("GAME OVER");
 		Fields w = Fields.WALL;
 		Fields e = Fields.EMPTY;
-		map = new Fields[][] { { e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
+		map = new Fields[][] {
+				{ e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
 				{ e, e, e, e, w, w, w, e, e, e, w, w, w, e, e, w, e, e, e, w, e, w, w, w, w, e, e, e },
 				{ e, e, e, w, e, e, e, e, e, w, e, e, e, w, e, w, w, e, w, w, e, w, e, e, e, e, e, e },
 				{ e, e, e, w, e, e, w, w, e, w, w, w, w, w, e, w, e, w, e, w, e, w, w, w, w, e, e, e },
@@ -152,7 +153,8 @@ class VacManModel {
 		System.out.println("YOU WIN!");
 		Fields w = Fields.WALL;
 		Fields e = Fields.EMPTY;
-		map = new Fields[][] { { e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
+		map = new Fields[][] {
+				{ e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
 				{ e, e, w, w, e, e, e, e, e, e, w, w, e, e, w, w, w, w, e, e, w, w, e, e, w, w, e, e },
 				{ e, e, e, w, w, w, e, e, w, w, w, e, e, w, w, e, e, w, w, e, w, w, e, e, w, w, e, e },
 				{ e, e, e, e, e, w, w, w, w, e, e, e, e, w, w, e, e, w, w, e, w, w, e, e, w, w, e, e },
@@ -254,6 +256,10 @@ class Vac extends Entity {
 		nextDir = dir;
 	}
 
+	void setLives(byte lives) {
+		this.lives = lives;
+	}
+
 	void update(VacManModel model) {
 		Fields[][] map = model.getMap();
 		byte y = getY();
@@ -286,6 +292,8 @@ class Vac extends Entity {
 					if (--lives == 0) {
 						model.gameOver();
 					} else {
+						System.out.println("HIT");
+						System.out.println("LIVES:" + lives );
 						model.reset();
 					}
 					vulnerabilityCounter = 3;
