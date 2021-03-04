@@ -1,5 +1,6 @@
 package de.cau.infprogoo.vacman;
 
+import acm.util.JTFTools;
 import acm.util.RandomGenerator;
 
 // TODO Level/Level, Tunnel
@@ -8,8 +9,6 @@ class VacManModel {
 
 	static final byte ROWS = 14;
 	static final byte COLUMNS = 28;
-
-	private VacManView view = new VacManView();
 
 	private Vac vacMan = new Vac();
 	private Virus[] virus = { new RandomVirus(), new FollowVirus() };
@@ -20,6 +19,9 @@ class VacManModel {
 	private byte dotCounter;
 	private int score = 0;
 
+	private VacManView view = new VacManView();
+	private LighthouseView lighthouseView = new LighthouseView();
+	
 	VacManModel() {
 		initMap();
 		view.draw(this);
@@ -27,6 +29,10 @@ class VacManModel {
 	
 	VacManView getView() {
 		return view;
+	}
+	
+	LighthouseView getLighthouseView() {
+		return lighthouseView;
 	}
 
 	Vac getVacMan() {
@@ -155,6 +161,7 @@ class VacManModel {
 				{ e, e, e, e, w, w, w, e, e, e, e, w, e, e, e, w, w, w, w, e, w, e, e, e, w, e, e, e },
 				{ e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e } };
 		view.drawFields(map);
+		lighthouseView.close();
 	}
 
 	// game win

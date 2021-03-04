@@ -8,7 +8,6 @@ import acm.graphics.GRect;
 import acm.graphics.GLabel;
 import acm.util.JTFTools;
 
-// TODO implement LighHouse
 // TODO animations
 
 class VacManView extends GCompound {

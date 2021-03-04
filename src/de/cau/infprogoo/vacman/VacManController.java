@@ -26,10 +26,10 @@ class VacManController implements KeyListener {
 		} // reset entity positions button
 		else if (keyCode == KeyEvent.VK_R) {
 			model.resetPositions();
-		}// close lighthouseView
-		/*else if (keyCode == KeyEvent.VK_X) {
-			lighthouseView.close();
-		}*/
+		}// close lighthouseView button
+		else if (keyCode == KeyEvent.VK_X) {
+			model.getLighthouseView().close();
+		}
 	}
 
 	@Override

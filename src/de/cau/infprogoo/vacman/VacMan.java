@@ -19,13 +19,11 @@ public class VacMan extends GraphicsProgram {
 		setBackground(Color.BLACK);
 		VacManModel model = new VacManModel();
 		VacManController controller = new VacManController(model);
-		//LighthouseView lighthouseView = new LighthouseView(model);
 
 		setSize((int) model.getView().getWidth() + 75, (int) model.getView().getHeight() + 150);
-
 		add(model.getView());
 		addKeyListeners(controller);
-		//lighthouseView.connect();
+		model.getLighthouseView().connect();
 
 		// Game Loop
 		while (true) {
@@ -34,7 +32,7 @@ public class VacMan extends GraphicsProgram {
 			} else {
 				double startTime = System.nanoTime() / 1e6;
 				model.update();
-				//lighthouseView.update(startTime + MS_PER_UPDATE - System.nanoTime() / 1e6);
+				model.getLighthouseView().update(model,startTime + MS_PER_UPDATE - System.nanoTime() / 1e6);
 				model.getView().update(model, startTime + MS_PER_UPDATE - System.nanoTime() / 1e6);
 			}
 		}
