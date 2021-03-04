@@ -6,21 +6,21 @@ import acm.program.GraphicsProgram;
 import acm.util.JTFTools;
 
 public class VacMan extends GraphicsProgram {
-	
+
 	/** The frequency of game updates. */
 	static final int MS_PER_UPDATE = 333;
-	
+
 	public static void main(String[] args) {
 		new VacMan().start();
 	}
-	
+
 	public void run() {
 		// Initializes game
 		setBackground(Color.BLACK);
 		VacManView view = new VacManView();
 		VacManModel model = new VacManModel(view);
 		VacManController controller = new VacManController(model);
-		
+
 		setSize((int) view.getWidth() + 75, (int) view.getHeight() + 150);
 
 		add(view);
@@ -33,7 +33,11 @@ public class VacMan extends GraphicsProgram {
 			} else {
 				double startTime = System.nanoTime() / 1e6;
 				model.update();
-				view.update(model, startTime + MS_PER_UPDATE - System.nanoTime() / 1e6);
+				if (!model.isPaused()) {
+					view.update(model, startTime + MS_PER_UPDATE - System.nanoTime() / 1e6);
+				} else {
+					model.pause();
+				}
 			}
 		}
 	}
