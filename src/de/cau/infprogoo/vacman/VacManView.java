@@ -122,7 +122,7 @@ class VacManView extends GCompound {
 }
 
 class Wall extends GCompound {
-	public Wall() {
+	Wall() {
 		GRect rect = new GRect(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
 		rect.setFilled(true);
 		rect.setColor(Color.BLUE);
@@ -131,7 +131,7 @@ class Wall extends GCompound {
 }
 
 class Dot extends GCompound {
-	public Dot() {
+	Dot() {
 		int fieldSize = VacManView.FIELD_SIZE;
 		GOval dot = new GOval(fieldSize / 5 * 2, fieldSize / 5 * 2, fieldSize / 5, fieldSize / 5);
 		dot.setFilled(true);
@@ -141,7 +141,7 @@ class Dot extends GCompound {
 }
 
 class Bonus extends GCompound {
-	public Bonus() {
+	Bonus() {
 		int fieldSize = VacManView.FIELD_SIZE;
 		GOval dot = new GOval(fieldSize / 3, fieldSize / 3, fieldSize / 3, fieldSize / 3);
 		dot.setFilled(true);
@@ -151,7 +151,7 @@ class Bonus extends GCompound {
 }
 
 class Gate extends GCompound {
-	public Gate() {
+	Gate() {
 		int fieldSize = VacManView.FIELD_SIZE;
 		GRect rect = new GRect(fieldSize, fieldSize / 6);
 		rect.setFilled(true);
@@ -161,7 +161,7 @@ class Gate extends GCompound {
 }
 
 class VacBody extends GCompound {
-	public VacBody() {
+	VacBody() {
 		GOval head = new GOval(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
 		head.setFilled(true);
 		head.setColor(Color.YELLOW);
@@ -178,7 +178,7 @@ class VirusBody extends GCompound {
 	private GOval head = new GOval(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
 	private boolean frightened = false;
 
-	public VirusBody(Color color) {
+	VirusBody(Color color) {
 		normalColor = color;
 		head.setFilled(true);
 		head.setColor(normalColor);

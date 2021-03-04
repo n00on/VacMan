@@ -15,6 +15,7 @@ class VacManModel {
 	private Virus[] virus = { new RandomVirus(), new FollowVirus() };
 	private Fields[][] map = new Fields[ROWS][COLUMNS];
 
+	private boolean reset = false;
 	private boolean paused = false;
 	private byte dotCounter;
 	private int score = 0;
@@ -22,51 +23,7 @@ class VacManModel {
 	VacManModel(VacManView view) {
 		this.view = view;
 		initMap();
-		reset();
-		paused = false;
-	}
-
-	// reset game state
-	void reset() {
-		paused = true;
-
-		vacMan = new Vac();
-		virus[0] = new RandomVirus();
-		virus[1] = new FollowVirus();
 		view.draw(this);
-	}
-
-	private void initMap() {
-
-		Fields w = Fields.WALL;
-		Fields d = Fields.DOT;
-		Fields g = Fields.GATE;
-		Fields b = Fields.BONUS;
-		Fields e = Fields.EMPTY;
-
-		Fields[][] map = { { w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w },
-				{ w, b, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, b, w },
-				{ w, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, w },
-				{ w, d, w, w, w, d, d, w, w, d, w, w, e, w, w, e, w, w, d, w, w, d, d, w, w, w, d, w },
-				{ w, d, d, d, w, w, d, d, d, d, e, e, e, e, e, e, e, e, d, d, d, d, w, w, d, d, d, w },
-				{ w, w, w, d, d, d, d, w, w, d, w, e, w, g, g, w, e, w, d, w, w, d, d, d, d, w, w, w },
-				{ w, d, d, d, d, w, d, d, w, d, w, e, w, e, e, w, e, w, d, w, d, d, w, d, d, d, d, w },
-				{ w, w, w, w, d, w, w, d, d, d, w, e, w, w, w, w, e, w, d, d, d, w, w, d, w, w, w, w },
-				{ w, d, d, d, d, d, w, d, w, d, e, e, e, e, e, e, e, e, d, w, d, w, d, d, d, d, d, w },
-				{ w, d, w, w, w, d, d, d, w, d, w, e, w, w, w, w, e, w, d, w, d, d, d, w, w, w, d, w },
-				{ w, d, d, d, d, d, w, d, w, d, w, d, d, d, d, d, d, w, d, w, d, w, d, d, d, d, d, w },
-				{ w, d, w, w, w, w, w, d, d, d, w, w, w, e, e, w, w, w, d, d, d, w, w, w, w, w, d, w },
-				{ w, b, d, d, d, d, d, d, w, d, d, d, d, e, e, d, d, d, d, w, d, d, d, d, d, d, b, w },
-				{ w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w } };
-
-		for (int x = 0; x < VacManModel.COLUMNS; x++) {
-			for (int y = 0; y < VacManModel.ROWS; y++) {
-				if (map[y][x].VALUE >= d.VALUE) {
-					dotCounter++;
-				}
-			}
-		}
-		this.map = map;
 	}
 
 	Vac getVacMan() {
@@ -88,27 +45,50 @@ class VacManModel {
 	void pause() {
 		paused = !paused;
 	}
+	
+	/**
+	 * Reset vac man and viruses in next update
+	 */
+	void reset() {
+		reset = true;
+	}
+
+	Fields[][] getMap() {
+		return map;
+	}
 
 	// updates the entire game
 	void update() {
+		
+		if (reset) {
+			paused = true;
+	
+			vacMan.reset();
+			virus[0] = new RandomVirus();
+			virus[1] = new FollowVirus();
+			view.draw(this);
+			reset = false;
+			paused = false;
+		}
+		
 		byte x = vacMan.getX();
 		byte y = vacMan.getY();
-
+	
 		if (map[y][x].VALUE >= Fields.DOT.VALUE) {
 			score += map[y][x].VALUE;
 			dotCounter--;
-
+	
 			if (dotCounter == 0) {
 				System.out.println("YOU WIN!");
 				win();
 			}
-
+	
 			if (map[y][x].VALUE == Fields.BONUS.VALUE) {
 				for (Virus vir : virus) {
 					vir.frighten();
 				}
 			}
-
+	
 			map[y][x] = Fields.EMPTY;
 		}
 		// update vacman, checkHit
@@ -119,8 +99,38 @@ class VacManModel {
 		}
 	}
 
-	Fields[][] getMap() {
-		return map;
+	private void initMap() {
+	
+		Fields w = Fields.WALL;
+		Fields d = Fields.DOT;
+		Fields g = Fields.GATE;
+		Fields b = Fields.BONUS;
+		Fields e = Fields.EMPTY;
+	
+		Fields[][] map = { 
+				{ w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w },
+				{ w, b, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, b, w },
+				{ w, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, w },
+				{ w, d, w, w, w, d, d, w, w, d, w, w, e, w, w, e, w, w, d, w, w, d, d, w, w, w, d, w },
+				{ w, d, d, d, w, w, d, d, d, d, e, e, e, e, e, e, e, e, d, d, d, d, w, w, d, d, d, w },
+				{ w, w, w, d, d, d, d, w, w, d, w, e, w, g, g, w, e, w, d, w, w, d, d, d, d, w, w, w },
+				{ w, d, d, d, d, w, d, d, w, d, w, e, w, e, e, w, e, w, d, w, d, d, w, d, d, d, d, w },
+				{ w, w, w, w, d, w, w, d, d, d, w, e, w, w, w, w, e, w, d, d, d, w, w, d, w, w, w, w },
+				{ w, d, d, d, d, d, w, d, w, d, e, e, e, e, e, e, e, e, d, w, d, w, d, d, d, d, d, w },
+				{ w, d, w, w, w, d, d, d, w, d, w, e, w, w, w, w, e, w, d, w, d, d, d, w, w, w, d, w },
+				{ w, d, d, d, d, d, w, d, w, d, w, d, d, d, d, d, d, w, d, w, d, w, d, d, d, d, d, w },
+				{ w, d, w, w, w, w, w, d, d, d, w, w, w, e, e, w, w, w, d, d, d, w, w, w, w, w, d, w },
+				{ w, b, d, d, d, d, d, d, w, d, d, d, d, e, e, d, d, d, d, w, d, d, d, d, d, d, b, w },
+				{ w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w } };
+	
+		for (int x = 0; x < VacManModel.COLUMNS; x++) {
+			for (int y = 0; y < VacManModel.ROWS; y++) {
+				if (map[y][x].VALUE >= d.VALUE) {
+					dotCounter++;
+				}
+			}
+		}
+		this.map = map;
 	}
 
 	// game over
@@ -129,8 +139,7 @@ class VacManModel {
 		System.out.println("GAME OVER");
 		Fields w = Fields.WALL;
 		Fields e = Fields.EMPTY;
-		map = new Fields[][] {
-				{ e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
+		map = new Fields[][] { { e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
 				{ e, e, e, e, w, w, w, e, e, e, w, w, w, e, e, w, e, e, e, w, e, w, w, w, w, e, e, e },
 				{ e, e, e, w, e, e, e, e, e, w, e, e, e, w, e, w, w, e, w, w, e, w, e, e, e, e, e, e },
 				{ e, e, e, w, e, e, w, w, e, w, w, w, w, w, e, w, e, w, e, w, e, w, w, w, w, e, e, e },
@@ -153,8 +162,7 @@ class VacManModel {
 		System.out.println("YOU WIN!");
 		Fields w = Fields.WALL;
 		Fields e = Fields.EMPTY;
-		map = new Fields[][] {
-				{ e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
+		map = new Fields[][] { { e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
 				{ e, e, w, w, e, e, e, e, e, e, w, w, e, e, w, w, w, w, e, e, w, w, e, e, w, w, e, e },
 				{ e, e, e, w, w, w, e, e, w, w, w, e, e, w, w, e, e, w, w, e, w, w, e, e, w, w, e, e },
 				{ e, e, e, e, e, w, w, w, w, e, e, e, e, w, w, e, e, w, w, e, w, w, e, e, w, w, e, e },
@@ -194,20 +202,20 @@ abstract class Entity {
 		y = YSTART;
 	}
 
-	Direction getDir() {
-		return dir;
-	}
-
-	void setDir(Direction dir) {
-		this.dir = dir;
-	}
-
 	byte getX() {
 		return x;
 	}
 
 	byte getY() {
 		return y;
+	}
+
+	Direction getDir() {
+		return dir;
+	}
+
+	void setDir(Direction dir) {
+		this.dir = dir;
 	}
 
 	void update(VacManModel model) {
@@ -224,6 +232,11 @@ abstract class Entity {
 	void update() {
 		x += dir.X;
 		y += dir.Y;
+	}
+	
+	void reset() {
+		x = XSTART;
+		y = YSTART;
 	}
 }
 
@@ -254,10 +267,6 @@ class Vac extends Entity {
 
 	void setNextDir(Direction dir) {
 		nextDir = dir;
-	}
-
-	void setLives(byte lives) {
-		this.lives = lives;
 	}
 
 	void update(VacManModel model) {
@@ -293,7 +302,7 @@ class Vac extends Entity {
 						model.gameOver();
 					} else {
 						System.out.println("HIT");
-						System.out.println("LIVES:" + lives );
+						System.out.println("LIVES: " + lives );
 						model.reset();
 					}
 					vulnerabilityCounter = 3;
@@ -317,7 +326,7 @@ class Virus extends Entity {
 	private boolean isOut = false;
 	private int frightCounter = 0;
 
-	public Virus(int xStart) {
+	Virus(int xStart) {
 		super(xStart, YSTART);
 	}
 
@@ -356,6 +365,9 @@ class Virus extends Entity {
 				xGoal = rgen.nextInt(VacManModel.COLUMNS);
 				yGoal = rgen.nextInt(VacManModel.ROWS);
 				frightCounter--;
+				if (frightCounter == 0) {
+					setDir(getDir().getOpposite());
+				}
 			}
 
 			double distance = 1000;
@@ -393,7 +405,7 @@ class RandomVirus extends Virus {
 
 	private static final byte XSTART = 13;
 
-	public RandomVirus() {
+	RandomVirus() {
 		super(XSTART);
 	}
 
