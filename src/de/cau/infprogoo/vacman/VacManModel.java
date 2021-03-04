@@ -2,28 +2,31 @@ package de.cau.infprogoo.vacman;
 
 import acm.util.RandomGenerator;
 
-// TODO GAME OVER, Level/Level, Tunnel
+// TODO Level/Level, Tunnel
 
 class VacManModel {
 
 	static final byte ROWS = 14;
 	static final byte COLUMNS = 28;
 
-	private VacManView view;
+	private VacManView view = new VacManView();
 
 	private Vac vacMan = new Vac();
 	private Virus[] virus = { new RandomVirus(), new FollowVirus() };
 	private Fields[][] map = new Fields[ROWS][COLUMNS];
 
-	private boolean reset = false;
+	private boolean resetPositions = false;
 	private boolean paused = false;
 	private byte dotCounter;
 	private int score = 0;
 
-	VacManModel(VacManView view) {
-		this.view = view;
+	VacManModel() {
 		initMap();
 		view.draw(this);
+	}
+	
+	VacManView getView() {
+		return view;
 	}
 
 	Vac getVacMan() {
@@ -49,25 +52,25 @@ class VacManModel {
 	/**
 	 * Reset vac man and viruses in next update
 	 */
-	void reset() {
-		reset = true;
+	void resetPositions() {
+		resetPositions = true;
 	}
 
 	Fields[][] getMap() {
 		return map;
 	}
 
-	// updates the entire game
+	// updates the entire game state
 	void update() {
 		
-		if (reset) {
+		if (resetPositions) {
 			paused = true;
 	
 			vacMan.reset();
 			virus[0] = new RandomVirus();
 			virus[1] = new FollowVirus();
 			view.draw(this);
-			reset = false;
+			resetPositions = false;
 			paused = false;
 		}
 		
@@ -91,9 +94,7 @@ class VacManModel {
 	
 			map[y][x] = Fields.EMPTY;
 		}
-		// update vacman, checkHit
 		vacMan.update(this);
-		// update virus
 		for (Virus vir : virus) {
 			vir.update(this);
 		}
@@ -303,7 +304,7 @@ class Vac extends Entity {
 					} else {
 						System.out.println("HIT");
 						System.out.println("LIVES: " + lives );
-						model.reset();
+						model.resetPositions();
 					}
 					vulnerabilityCounter = 3;
 					return true;

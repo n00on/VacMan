@@ -23,10 +23,13 @@ class VacManController implements KeyListener {
 			model.getVacMan().setNextDir(Direction.DOWN);
 		} else if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT) {
 			model.getVacMan().setNextDir(Direction.RIGHT);
-		} // restart game button
+		} // reset entity positions button
 		else if (keyCode == KeyEvent.VK_R) {
-			model.reset();
-		}
+			model.resetPositions();
+		}// close lighthouseView
+		/*else if (keyCode == KeyEvent.VK_X) {
+			lighthouseView.close();
+		}*/
 	}
 
 	@Override
