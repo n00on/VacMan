@@ -20,9 +20,15 @@ class VacManView extends GCompound {
 	/** View of Vac-Man. */
 	private VacBody vacMan = new VacBody();
 	/** Array of Ghost bodies. 0 -> RandomVirus */
-	private VirusBody[] virus = { new VirusBody(Color.GREEN), new VirusBody(Color.ORANGE) };
+	private VirusBody[] virus = { new VirusBody(Color.GREEN), new VirusBody(Color.ORANGE), new VirusBody(Color.MAGENTA) };
 
 	private GLabel scoreDisplay;
+	
+	public VacManView() {
+		scoreDisplay = new GLabel("SCORE: 0");
+		scoreDisplay.setColor(Color.WHITE);
+		scoreDisplay.setFont("Default-20");
+	}
 
 	/**
 	 * Draws the view.
@@ -30,6 +36,7 @@ class VacManView extends GCompound {
 	 * @param model
 	 */
 	void draw(VacManModel model) {
+		
 		drawFields(model.getMap());
 		Vac vMan = model.getVacMan();
 		add(vacMan, FIELD_OFFSET / 2 + FIELD_SIZE * vMan.getX(), FIELD_OFFSET + FIELD_SIZE * vMan.getY());
@@ -39,15 +46,12 @@ class VacManView extends GCompound {
 			add(this.virus[i], FIELD_OFFSET / 2 + FIELD_SIZE * virus[i].getX(),
 					FIELD_OFFSET + FIELD_SIZE * virus[i].getY());
 		}
-
-		scoreDisplay = new GLabel("SCORE \n" + model.getScore());
-		scoreDisplay.setColor(Color.WHITE);
-		scoreDisplay.setFont("Default-20");
-		add(scoreDisplay, this.getWidth() - 3 * FIELD_SIZE, 30);
 	}
 
 	void drawFields(Fields[][] map) {
+		
 		removeAll();
+		
 		for (int x = 0; x < VacManModel.COLUMNS; x++) {
 			for (int y = 0; y < VacManModel.ROWS; y++) {
 				GCompound field = null;
@@ -72,16 +76,15 @@ class VacManView extends GCompound {
 				}
 			}
 		}
+		add(scoreDisplay, this.getWidth() - 3 * FIELD_SIZE, 30);
 	}
 
 	void update(VacManModel model, double ms) {
-		scoreDisplay.setLabel("SCORE \n" + model.getScore());
+		scoreDisplay.setLabel("SCORE: " + model.getScore());
 
 		Virus[] virus = model.getVirus();
 		for (int i = 0; i < virus.length; i++) {
-			if (this.virus[i].isFrightened() != virus[i].isFrightened()) {
-				this.virus[i].switchFright();
-			}
+			this.virus[i].update(virus[i]);
 		}
 
 		animate(model, ms);
@@ -120,6 +123,55 @@ class VacManView extends GCompound {
 
 }
 
+class VacBody extends GCompound {
+	VacBody() {
+		GOval head = new GOval(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
+		head.setFilled(true);
+		head.setColor(Color.YELLOW);
+		add(head);
+	}
+}
+
+// TODO Virus view while vulnerable
+class VirusBody extends GCompound {
+
+	private static final Color frightColor = Color.CYAN;
+	private static final Color eatenColor = Color.LIGHT_GRAY;
+
+	private final Color normalColor;
+	private GOval head = new GOval(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
+	private boolean frightened = false;
+	private boolean eaten = false;
+
+	VirusBody(Color color) {
+		normalColor = color;
+		head.setFilled(true);
+		head.setColor(normalColor);
+		add(head);
+	}
+
+	void update(Virus virus) {
+		if (frightened != virus.isFrightened() || eaten != virus.isEaten()) {
+			if (!eaten && virus.isEaten()) {
+				head.setColor(eatenColor);
+				eaten = true;
+				frightened = false;
+			} else if (!frightened) {
+				head.setColor(frightColor);
+				frightened = true;
+			} else {
+				head.setColor(normalColor);
+				eaten = false;
+				frightened = false;
+			}
+		}
+	}
+
+	boolean isFrightened() {
+		return frightened;
+	}
+}
+
 class Wall extends GCompound {
 	Wall() {
 		GRect rect = new GRect(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
@@ -156,44 +208,5 @@ class Gate extends GCompound {
 		rect.setFilled(true);
 		rect.setColor(Color.gray);
 		add(rect);
-	}
-}
-
-class VacBody extends GCompound {
-	VacBody() {
-		GOval head = new GOval(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
-		head.setFilled(true);
-		head.setColor(Color.YELLOW);
-		add(head);
-	}
-}
-
-// TODO Virus view while vulnerable
-class VirusBody extends GCompound {
-
-	private static final Color frightColor = Color.CYAN;
-
-	private final Color normalColor;
-	private GOval head = new GOval(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
-	private boolean frightened = false;
-
-	VirusBody(Color color) {
-		normalColor = color;
-		head.setFilled(true);
-		head.setColor(normalColor);
-		add(head);
-	}
-
-	void switchFright() {
-		if (!frightened) {
-			head.setColor(frightColor);
-		} else {
-			head.setColor(normalColor);
-		}
-		frightened = !frightened;
-	}
-
-	boolean isFrightened() {
-		return frightened;
 	}
 }

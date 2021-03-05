@@ -1,13 +1,6 @@
 package de.cau.infprogoo.vacman;
 
-import java.awt.Color;
 import java.io.IOException;
-
-import acm.graphics.GCompound;
-import acm.graphics.GOval;
-import acm.graphics.GRect;
-import acm.graphics.GLabel;
-import acm.util.JTFTools;
 import de.cau.infprogoo.lighthouse.LighthouseDisplay;
 
 // TODO In Bearbeitung LightHouse
@@ -33,7 +26,7 @@ class LighthouseView {
 		}
 	}
 
-	void update(VacManModel model, double ms) {
+	void update(VacManModel model) {
 		// Send data to the display
 		try {
 			this.model = model;
