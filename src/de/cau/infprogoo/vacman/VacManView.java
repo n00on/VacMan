@@ -23,6 +23,7 @@ class VacManView extends GCompound {
 	private VirusBody[] virus = { new VirusBody(Color.GREEN), new VirusBody(Color.ORANGE), new VirusBody(Color.MAGENTA) };
 
 	private GLabel scoreDisplay;
+	private LifeDisplay lifeDisplay = new LifeDisplay();
 	
 	public VacManView() {
 		scoreDisplay = new GLabel("SCORE: 0");
@@ -40,6 +41,7 @@ class VacManView extends GCompound {
 		drawFields(model.getMap());
 		Vac vMan = model.getVacMan();
 		add(vacMan, FIELD_OFFSET / 2 + FIELD_SIZE * vMan.getX(), FIELD_OFFSET + FIELD_SIZE * vMan.getY());
+		add(lifeDisplay, FIELD_OFFSET / 2, 10);
 
 		Entity[] virus = model.getVirus();
 		for (int i = 0; i < virus.length; i++) {
@@ -81,6 +83,7 @@ class VacManView extends GCompound {
 
 	void update(VacManModel model, double ms) {
 		scoreDisplay.setLabel("SCORE: " + model.getScore());
+		lifeDisplay.update(model);
 
 		Virus[] virus = model.getVirus();
 		for (int i = 0; i < virus.length; i++) {
@@ -208,5 +211,23 @@ class Gate extends GCompound {
 		rect.setFilled(true);
 		rect.setColor(Color.gray);
 		add(rect);
+	}
+}
+
+class LifeDisplay extends GCompound {
+	VacBody[] lives = { new VacBody(),  new VacBody(),  new VacBody() };
+	byte lifeCount = 3;
+	
+	public LifeDisplay() {
+		for (byte i = 0; i < lives.length; i++) {
+			add(lives[i], i * VacManView.FIELD_SIZE, 0);
+		}
+	}
+	
+	void update(VacManModel model) {
+		if (model.getVacMan().getLives() != lifeCount) {
+			lifeCount--;
+			remove(lives[lifeCount]);
+		}
 	}
 }
