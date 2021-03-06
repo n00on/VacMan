@@ -94,34 +94,25 @@ class VacManView extends GCompound {
 
 		byte x = model.getVacMan().getX();
 		byte y = model.getVacMan().getY();
-		if (fields[y][x] != null) {
+		if (fields[y][x] != null && model.getMap()[y][x] == Fields.EMPTY) {
 			remove(fields[y][x]);
 			fields[y][x] = null;
 		}
 	}
 
 	void animate(VacManModel model, double ms) {
-		double msPerFrame = 33;
+		double msPerFrame = ms / FIELD_SIZE;
 
 		Vac vMan = model.getVacMan();
 		Entity[] virus = model.getVirus();
-		double step = FIELD_SIZE * msPerFrame / ms;
 
-		int rest = FIELD_SIZE;
-
-		for (int i = 0; i < ms / msPerFrame - 1; i++) {
-			if (vMan.isMoving()) {
-				vacMan.move(step * vMan.getDir().X, step * vMan.getDir().Y);
-			}
+		for (int i = 0; i < FIELD_SIZE; i++) {
+			vacMan.move(vMan.getDir().X, vMan.getDir().Y);
 			for (byte j = 0; j < virus.length; j++) {
-				this.virus[j].move(step * virus[j].getDir().X, step * virus[j].getDir().Y);
+				this.virus[j].move(virus[j].getDir().X, virus[j].getDir().Y);
 			}
-			rest -= step;
 			JTFTools.pause(msPerFrame);
 		}
-//		System.out.println(rest);
-		if (vMan.isMoving())
-			vacMan.move(rest * vMan.getDir().X, rest * vMan.getDir().Y);
 	}
 
 }
@@ -135,7 +126,6 @@ class VacBody extends GCompound {
 	}
 }
 
-// TODO Virus view while vulnerable
 class VirusBody extends GCompound {
 
 	private static final Color frightColor = Color.CYAN;

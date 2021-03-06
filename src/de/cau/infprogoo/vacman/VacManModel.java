@@ -63,6 +63,7 @@ class VacManModel {
 	}
 	
 	void newLevel() {
+		resetPositions = true;
 		initMap();
 		view.draw(this);
 	}
@@ -75,41 +76,42 @@ class VacManModel {
 	void update() {
 		
 		if (resetPositions) {
-			paused = true;
-	
 			vacMan.reset();
 			virus[0] = new RandomVirus();
 			virus[1] = new FollowVirus();
 			virus[2] = new PredictVirus();
 			view.draw(this);
 			resetPositions = false;
-			paused = false;
 		}
+		
+		vacMan.update(this);
 		
 		byte x = vacMan.getX();
 		byte y = vacMan.getY();
-	
-		if (map[y][x].VALUE >= Fields.DOT.VALUE) {
-			score += map[y][x].VALUE;
-			dotCounter--;
-	
-			if (dotCounter == 0) {
-				resetPositions = true;
-				newLevel();
-			}
-	
-			if (map[y][x].VALUE == Fields.BONUS.VALUE) {
-				for (Virus vir : virus) {
-					vir.frighten();
-				}
-			}
-	
-			map[y][x] = Fields.EMPTY;
-		}
-		vacMan.update(this);
+		
 		for (Virus vir : virus) {
 			vir.update(this);
 		}
+		
+		if (map[y][x].VALUE >= Fields.DOT.VALUE) {
+			
+			score += map[y][x].VALUE;
+	
+			if (--dotCounter == 0) {
+				newLevel();
+			} else {
+	
+				if (map[y][x] == Fields.BONUS) {
+					for (Virus vir : virus) {
+						vir.frighten();
+					}
+				}
+		
+				map[y][x] = Fields.EMPTY;
+			}
+		}
+		
+		vacMan.checkHit(this);
 	}
 
 	private void initMap() {
@@ -127,7 +129,7 @@ class VacManModel {
 				{ w, d, w, w, w, d, d, w, w, d, w, w, e, w, w, e, w, w, d, w, w, d, d, w, w, w, d, w },
 				{ w, d, d, d, w, w, d, d, d, d, e, e, e, e, e, e, e, e, d, d, d, d, w, w, d, d, d, w },
 				{ w, w, w, d, d, d, d, w, w, d, w, e, w, g, g, w, e, w, d, w, w, d, d, d, d, w, w, w },
-				{ w, d, d, d, d, w, d, d, w, d, w, e, w, e, e, w, e, w, d, w, d, d, w, d, d, d, d, w },
+				{ w, e, e, d, d, w, d, d, w, d, w, e, w, e, e, w, e, w, d, w, d, d, w, d, d, e, e, w },
 				{ w, w, w, w, d, w, w, d, d, d, w, e, w, w, w, w, e, w, d, d, d, w, w, d, w, w, w, w },
 				{ w, d, d, d, d, d, w, d, w, d, e, e, e, e, e, e, e, e, d, w, d, w, d, d, d, d, d, w },
 				{ w, d, w, w, w, d, d, d, w, d, w, e, w, w, w, w, e, w, d, w, d, d, d, w, w, w, d, w },
@@ -214,7 +216,7 @@ enum Fields {
  * Enumeration of directions.
  */
 enum Direction {
-	UP(0, -1), DOWN(0, 1), LEFT(-1, 0), RIGHT(1, 0);
+	UP(0, -1), DOWN(0, 1), LEFT(-1, 0), RIGHT(1, 0), STILL(0, 0);
 
 	/** x direction. */
 	final byte X;
@@ -259,7 +261,7 @@ enum Direction {
 		case LEFT:
 			return RIGHT;
 		default:
-			return null;
+			return this;
 		}
 	}
 }

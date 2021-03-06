@@ -7,20 +7,20 @@ import acm.util.RandomGenerator;
  */
 abstract class Entity {
 	// Start values
-	private final byte XSTART;
-	private final byte YSTART;
-	private static final Direction DIRSTART = Direction.DOWN;
+	private final byte X_START;
+	private final byte Y_START;
+	private static final Direction DIR_START = Direction.STILL;
 
 	// Instance vars
-	private Direction dir = DIRSTART;
+	private Direction dir = DIR_START;
 	private byte x;
 	private byte y;
 
 	public Entity(int xStart, int yStart) {
-		XSTART = (byte) xStart;
-		YSTART = (byte) yStart;
-		x = XSTART;
-		y = YSTART;
+		X_START = (byte) xStart;
+		Y_START = (byte) yStart;
+		x = X_START;
+		y = Y_START;
 	}
 
 	byte getX() {
@@ -46,19 +46,17 @@ abstract class Entity {
 			x += dir.X;
 			y += dir.Y;
 		}
-
-		model.getVacMan().checkHit(model);
 	}
 
 	void update() {
 		x += dir.X;
 		y += dir.Y;
 	}
-	
+
 	void reset() {
-		x = XSTART;
-		y = YSTART;
-		dir = DIRSTART;
+		x = X_START;
+		y = Y_START;
+		dir = DIR_START;
 	}
 }
 
@@ -67,24 +65,19 @@ abstract class Entity {
  */
 class Vac extends Entity {
 
-	private static final byte XSTART = 13;
-	private static final byte YSTART = 12;
+	private static final byte X_START = 13;
+	private static final byte Y_START = 12;
 
 	private Direction nextDir = Direction.DOWN;
-	private boolean moving = false;
 	private byte lives = 3;
 	private byte vulnerabilityCounter = 0;
 
 	public Vac() {
-		super(XSTART, YSTART);
+		super(X_START, Y_START);
 	}
 
 	byte getLives() {
 		return lives;
-	}
-
-	boolean isMoving() {
-		return moving;
 	}
 
 	void setNextDir(Direction dir) {
@@ -92,7 +85,6 @@ class Vac extends Entity {
 	}
 
 	void update(VacManModel model) {
-//		checkHit(model);
 		Fields[][] map = model.getMap();
 		byte y = getY();
 		byte x = getX();
@@ -101,32 +93,30 @@ class Vac extends Entity {
 			setDir(nextDir);
 		}
 
-		if (map[y + getDir().Y][x + getDir().X].VALUE >= Fields.EMPTY.VALUE) {
-			moving = true;
-		} else {
-			moving = false;
+		if (map[y + getDir().Y][x + getDir().X].VALUE < Fields.EMPTY.VALUE) {
+			setDir(Direction.STILL);
 		}
-		
+
 		if (vulnerabilityCounter > 0) {
 			vulnerabilityCounter--;
 		}
 
 		super.update(model);
-//		checkHit(model);
 	}
 
 	boolean checkHit(VacManModel model) {
 		// Iterates through virus
 		for (Virus virus : model.getVirus()) {
 			// If Hit
-			if (getX() == virus.getX() && getY() == virus.getY()) {
+			if (getX() == virus.getX() && getY() == virus.getY() || getX() + getDir().getOpposite().X == virus.getX()
+					&& getY() + getDir().getOpposite().Y == virus.getY()
+					&& virus.getX() + virus.getDir().getOpposite().X == getX()
+					&& virus.getY() + virus.getDir().getOpposite().Y == getY()) {
 				// Losing life or eating ghost
 				if (vulnerabilityCounter == 0 && !virus.isFrightened() && !virus.isEaten()) {
 					if (--lives == 0) {
 						model.gameOver();
 					} else {
-						System.out.println("HIT");
-						System.out.println("LIVES: " + lives );
 						model.resetPositions();
 					}
 					vulnerabilityCounter = 3;
@@ -139,10 +129,9 @@ class Vac extends Entity {
 		}
 		return false;
 	}
-	
+
 	void reset() {
 		super.reset();
-		moving = false;
 	}
 }
 
@@ -152,30 +141,28 @@ class Vac extends Entity {
 class Virus extends Entity {
 
 	private static final byte Y_BACK = 4;
-	private static final byte X_BACK = 14;
-	
-	private static final byte YSTART = 6;
+
+	private final byte X_START;
+	private static final byte Y_START = 6;
 	/** Is out of the starting box? */
-	private boolean isOut = false;
+	private int outCounter = 2;
 	private boolean isEaten = false;
+	private boolean frighten = false;
 	private int frightCounter = 0;
 
-	Virus(int xStart) {
-		super(xStart, YSTART);
+	Virus(int xStart, int outTime) {
+		super(xStart, Y_START);
+		X_START = (byte) xStart;
+		outCounter += outTime;
 	}
 
 	/**
 	 * Starts frightened behavior and counter.
 	 */
 	void frighten() {
-		if (!isEaten) {
-			if (frightCounter == 0) {
-				setDir(getDir().getOpposite());
-			}
-			frightCounter = 30;
-		}
+		frighten = true;
 	}
-	
+
 	void eat() {
 		isEaten = true;
 		frightCounter = 0;
@@ -184,7 +171,7 @@ class Virus extends Entity {
 	boolean isFrightened() {
 		return frightCounter > 0;
 	}
-	
+
 	boolean isEaten() {
 		return isEaten;
 	}
@@ -203,32 +190,40 @@ class Virus extends Entity {
 		byte y = getY();
 		Direction dir = getDir();
 
-		if (isOut) {
+		if (outCounter == 0) {
+
+			if (frighten && !isEaten) {
+				if (frightCounter == 0) {
+					setDir(getDir().getOpposite());
+				}
+				frightCounter = 30;
+				frighten = false;
+			}
+
 			// Random behavior if frightened
 			if (frightCounter > 0) {
 				RandomGenerator rgen = new RandomGenerator();
 				xGoal = rgen.nextInt(VacManModel.COLUMNS);
 				yGoal = rgen.nextInt(VacManModel.ROWS);
-				frightCounter--;
-				if (frightCounter == 0) {
+				if (--frightCounter == 0) {
 					setDir(getDir().getOpposite());
 				}
 			} else if (isEaten) {
-				xGoal = X_BACK;
+				xGoal = X_START;
 				yGoal = Y_BACK;
 			}
-			
+
 			if (isEaten && (x == xGoal && y == yGoal || map[y][x] == Fields.GATE)) {
 				setDir(Direction.DOWN);
 				if (map[y][x] == Fields.GATE) {
 					isEaten = false;
-					isOut = false;
+					outCounter = 2;
 				}
 				super.update();
 			} else {
 
 				double distance = 1000;
-	
+
 				// Finds the next cell which isnt in the opposite direction and is closest to
 				// the goal cell
 				for (Direction newDir : Direction.getArray()) {
@@ -242,14 +237,15 @@ class Virus extends Entity {
 						}
 					}
 				}
-	
+
 				super.update(model);
 			}
 		} else {
 			// If still in starting room, moves up.
-			setDir(Direction.UP);
-			if (map[y][x] == Fields.GATE) {
-				isOut = true;
+			if (outCounter-- > 2) {
+				setDir(Direction.STILL);
+			} else {
+				setDir(Direction.UP);
 			}
 			super.update();
 		}
@@ -264,7 +260,7 @@ class RandomVirus extends Virus {
 	private static final byte XSTART = 13;
 
 	RandomVirus() {
-		super(XSTART);
+		super(XSTART, 1);
 	}
 
 	/**
@@ -284,7 +280,7 @@ class FollowVirus extends Virus {
 	private static final byte XSTART = 14;
 
 	public FollowVirus() {
-		super(XSTART);
+		super(XSTART, 4);
 	}
 
 	/**
@@ -302,7 +298,7 @@ class PredictVirus extends Virus {
 	private static final byte XSTART = 14;
 
 	public PredictVirus() {
-		super(XSTART);
+		super(XSTART, 7);
 	}
 
 	/**

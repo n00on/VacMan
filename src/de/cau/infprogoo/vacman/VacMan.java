@@ -8,7 +8,7 @@ import acm.util.JTFTools;
 public class VacMan extends GraphicsProgram {
 
 	/** The frequency of game updates. */
-	static final int MS_PER_UPDATE = 333;
+	static final int MS_PER_UPDATE = 300;
 
 	public static void main(String[] args) {
 		new VacMan().start();
@@ -24,6 +24,7 @@ public class VacMan extends GraphicsProgram {
 		add(model.getView());
 		addKeyListeners(controller);
 //		model.getLighthouseView().connect();
+//		model.pause();
 
 		// Game Loop
 		while (true) {
