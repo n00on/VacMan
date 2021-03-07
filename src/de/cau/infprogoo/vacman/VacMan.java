@@ -7,9 +7,6 @@ import acm.util.JTFTools;
 
 public class VacMan extends GraphicsProgram {
 
-	/** The frequency of game updates. */
-	static final int MS_PER_UPDATE = 300;
-
 	public static void main(String[] args) {
 		new VacMan().start();
 	}
@@ -29,12 +26,12 @@ public class VacMan extends GraphicsProgram {
 		// Game Loop
 		while (true) {
 			if (model.isPaused()) {
-				JTFTools.pause(MS_PER_UPDATE);
+				JTFTools.pause(model.getMsperUpdate());
 			} else {
 				double startTime = System.nanoTime() / 1e6;
 				model.update();
 //				model.getLighthouseView().update(model);
-				model.getView().update(model, startTime + MS_PER_UPDATE - System.nanoTime() / 1e6);
+				model.getView().update(model, startTime + model.getMsperUpdate() - System.nanoTime() / 1e6);
 			}
 		}
 	}

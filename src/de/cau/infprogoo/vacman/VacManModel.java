@@ -10,7 +10,8 @@ class VacManModel {
 	private Vac vacMan = new Vac();
 	private Virus[] virus = { new RandomVirus(), new FollowVirus(), new PredictVirus() };
 	private Fields[][] map = new Fields[ROWS][COLUMNS];
-
+	
+	private int msPerUpdate = 250;
 	private boolean resetPositions = false;
 	private boolean paused = false;
 	private byte dotCounter;
@@ -41,6 +42,10 @@ class VacManModel {
 
 	int getScore() {
 		return score;
+	}
+	
+	int getMsperUpdate() {
+		return msPerUpdate;
 	}
 
 	boolean isPaused() {
@@ -98,6 +103,7 @@ class VacManModel {
 			score += map[y][x].VALUE;
 	
 			if (--dotCounter == 0) {
+				msPerUpdate -= msPerUpdate / 10;
 				newLevel();
 			} else {
 	

@@ -39,8 +39,6 @@ class VacManView extends GCompound {
 	void draw(VacManModel model) {
 		
 		drawFields(model.getMap());
-		Vac vMan = model.getVacMan();
-		add(vacMan, FIELD_OFFSET / 2 + FIELD_SIZE * vMan.getX(), FIELD_OFFSET + FIELD_SIZE * vMan.getY());
 		add(lifeDisplay, FIELD_OFFSET / 2, 10);
 
 		Entity[] virus = model.getVirus();
@@ -48,6 +46,9 @@ class VacManView extends GCompound {
 			add(this.virus[i], FIELD_OFFSET / 2 + FIELD_SIZE * virus[i].getX(),
 					FIELD_OFFSET + FIELD_SIZE * virus[i].getY());
 		}
+		
+		Vac vMan = model.getVacMan();
+		add(vacMan, FIELD_OFFSET / 2 + FIELD_SIZE * vMan.getX(), FIELD_OFFSET + FIELD_SIZE * vMan.getY());
 	}
 
 	void drawFields(Fields[][] map) {
@@ -119,10 +120,10 @@ class VacManView extends GCompound {
 
 class VacBody extends GCompound {
 	VacBody() {
-		GOval head = new GOval(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
+		GOval head = new GOval(VacManView.FIELD_SIZE / 6 * 5, VacManView.FIELD_SIZE / 6 * 5);
 		head.setFilled(true);
 		head.setColor(Color.YELLOW);
-		add(head);
+		add(head, VacManView.FIELD_SIZE / 12 * 1, VacManView.FIELD_SIZE / 12 * 1);
 	}
 }
 
