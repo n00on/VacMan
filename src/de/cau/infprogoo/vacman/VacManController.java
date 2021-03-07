@@ -13,22 +13,34 @@ class VacManController implements KeyListener {
 
 	/** Updates model. */
 	void identifyKey(int keyCode) {
-		if (keyCode == KeyEvent.VK_SPACE) {
+		switch (keyCode) {
+		case KeyEvent.VK_SPACE:
 			model.pause();
-		} else if (keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_UP) {
+			break;
+		case KeyEvent.VK_W:
+		case KeyEvent.VK_UP:
 			model.getVacMan().setNextDir(Direction.UP);
-		} else if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT) {
+			break;
+		case KeyEvent.VK_A:
+		case KeyEvent.VK_LEFT:
 			model.getVacMan().setNextDir(Direction.LEFT);
-		} else if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN) {
+			break;
+		case KeyEvent.VK_S:
+		case KeyEvent.VK_DOWN:
 			model.getVacMan().setNextDir(Direction.DOWN);
-		} else if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT) {
+			break;
+		case KeyEvent.VK_D:
+		case KeyEvent.VK_RIGHT:
 			model.getVacMan().setNextDir(Direction.RIGHT);
-		} // reset entity positions button
-		else if (keyCode == KeyEvent.VK_R) {
+			break;
+		// reset entity positions
+		case KeyEvent.VK_R:
 			model.resetPositions();
-		}// close lighthouseView button
-		else if (keyCode == KeyEvent.VK_X) {
+			break;
+		// close lighthouseView
+		case KeyEvent.VK_X:
 			model.getLighthouseView().close();
+			break;
 		}
 	}
 
