@@ -73,6 +73,14 @@ class VacManModel {
 		view.draw(this);
 	}
 	
+	void startGame() {
+		msPerUpdate = 250;
+		score = 0;
+		vacMan = new Vac();
+		view.reset();
+		newLevel();
+	}
+	
 	void scoreEaten() {
 		score += 200;
 	}

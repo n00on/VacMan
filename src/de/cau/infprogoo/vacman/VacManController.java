@@ -35,7 +35,7 @@ class VacManController implements KeyListener {
 			break;
 		// reset entity positions
 		case KeyEvent.VK_R:
-			model.resetPositions();
+			model.startGame();
 			break;
 		// close lighthouseView
 		case KeyEvent.VK_X:

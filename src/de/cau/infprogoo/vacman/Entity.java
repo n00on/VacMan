@@ -260,7 +260,7 @@ class RandomVirus extends Virus {
 	private static final byte XSTART = 13;
 
 	RandomVirus() {
-		super(XSTART, 1);
+		super(XSTART, 2);
 	}
 
 	/**
@@ -280,7 +280,7 @@ class FollowVirus extends Virus {
 	private static final byte XSTART = 14;
 
 	public FollowVirus() {
-		super(XSTART, 4);
+		super(XSTART, 7);
 	}
 
 	/**
@@ -298,7 +298,7 @@ class PredictVirus extends Virus {
 	private static final byte XSTART = 14;
 
 	public PredictVirus() {
-		super(XSTART, 7);
+		super(XSTART, 12);
 	}
 
 	/**
