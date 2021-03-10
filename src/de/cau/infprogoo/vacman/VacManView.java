@@ -231,9 +231,8 @@ class LifeDisplay extends GCompound {
 	}
 
 	void update(VacManModel model) {
-		if (model.getVacMan().getLives() != lifeCount && lifeCount >= 0) {
-			lifeCount--;
-			remove(lives[lifeCount]);
+		if (model.getVacMan().getLives() != lifeCount && lifeCount > 0) {
+			remove(lives[--lifeCount]);
 		}
 	}
 }
