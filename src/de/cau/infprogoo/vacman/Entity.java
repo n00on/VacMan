@@ -7,20 +7,19 @@ import acm.util.RandomGenerator;
  */
 abstract class Entity {
 	// Start values
-	private final byte X_START;
-	private final byte Y_START;
+	final byte X_START;
+	final byte Y_START;
 	private static final Direction DIR_START = Direction.STILL;
 
 	// Instance vars
-	private Direction dir = DIR_START;
+	private Direction dir;
 	private byte x;
 	private byte y;
 
 	public Entity(int xStart, int yStart) {
 		X_START = (byte) xStart;
 		Y_START = (byte) yStart;
-		x = X_START;
-		y = Y_START;
+		reset();
 	}
 
 	byte getX() {
@@ -39,12 +38,19 @@ abstract class Entity {
 		this.dir = dir;
 	}
 
+	/**
+	 * Updates considering the goal field.
+	 * 
+	 * @param model
+	 */
 	void update(VacManModel model) {
 		Fields[][] map = model.getMap();
 
 		if (map[y + dir.Y][x + dir.X].VALUE >= Fields.EMPTY.VALUE) {
 			x += dir.X;
 			y += dir.Y;
+		} else {
+			dir = Direction.STILL;
 		}
 	}
 
@@ -65,15 +71,11 @@ abstract class Entity {
  */
 class Vac extends Entity {
 
-	private static final byte X_START = 13;
-	private static final byte Y_START = 12;
-
-	private Direction nextDir = Direction.DOWN;
+	private Direction nextDir = Direction.STILL;
 	private byte lives = 3;
-	private byte vulnerabilityCounter = 0;
 
 	public Vac() {
-		super(X_START, Y_START);
+		super(13, 12);
 	}
 
 	byte getLives() {
@@ -83,77 +85,66 @@ class Vac extends Entity {
 	void setNextDir(Direction dir) {
 		nextDir = dir;
 	}
+	
+	void reset() {
+		nextDir = Direction.STILL;
+		super.reset();
+	}
 
 	void update(VacManModel model) {
-		Fields[][] map = model.getMap();
-		byte y = getY();
-		byte x = getX();
 
-		if (map[y + nextDir.Y][x + nextDir.X].VALUE >= Fields.EMPTY.VALUE) {
+		if (model.getMap()[getY() + nextDir.Y][getX() + nextDir.X].VALUE >= Fields.EMPTY.VALUE) {
 			setDir(nextDir);
-		}
-
-		if (map[y + getDir().Y][x + getDir().X].VALUE < Fields.EMPTY.VALUE) {
-			setDir(Direction.STILL);
-		}
-
-		if (vulnerabilityCounter > 0) {
-			vulnerabilityCounter--;
 		}
 
 		super.update(model);
 	}
 
-	boolean checkHit(VacManModel model) {
+	void checkHit(VacManModel model) {
 		// Iterates through virus
 		for (Virus virus : model.getVirus()) {
 			// If Hit
-			if (getX() == virus.getX() && getY() == virus.getY() || getX() + getDir().getOpposite().X == virus.getX()
-					&& getY() + getDir().getOpposite().Y == virus.getY()
-					&& virus.getX() + virus.getDir().getOpposite().X == getX()
-					&& virus.getY() + virus.getDir().getOpposite().Y == getY()) {
-				// Losing life or eating ghost
-				if (vulnerabilityCounter == 0 && !virus.isFrightened() && !virus.isEaten()) {
+			if (getX() == virus.getX() && getY() == virus.getY() || //
+					getX() + getDir().getOpposite().X == virus.getX()
+							&& getY() + getDir().getOpposite().Y == virus.getY()
+							&& virus.getX() + virus.getDir().getOpposite().X == getX()
+							&& virus.getY() + virus.getDir().getOpposite().Y == getY()) {
+				// losing a life
+				if (!virus.isFrightened() && !virus.isEaten()) {
 					if (--lives == 0) {
 						model.gameOver();
 					} else {
 						model.resetPositions();
 					}
-					vulnerabilityCounter = 3;
-					return true;
+					return;
+					// or eating the ghost
 				} else if (virus.isFrightened()) {
 					virus.eat();
 					model.scoreEaten();
 				}
 			}
 		}
-		return false;
-	}
-
-	void reset() {
-		super.reset();
 	}
 }
 
 /**
  * Direct superclass for individual virus.
  */
-class Virus extends Entity {
+abstract class Virus extends Entity {
 
 	private static final byte Y_BACK = 4;
 
-	private final byte X_START;
-	private static final byte Y_START = 6;
 	/** Is out of the starting box? */
-	private int outCounter = 2;
-	private boolean isEaten = false;
-	private boolean frighten = false;
-	private int frightCounter = 0;
+	private int outCounter;
+	private final int outTime;
+	private boolean isEaten;
+	private boolean frighten;
+	private int frightCounter;
 
 	Virus(int xStart, int outTime) {
-		super(xStart, Y_START);
-		X_START = (byte) xStart;
-		outCounter += outTime;
+		super(xStart, 6);
+		this.outTime = outTime;
+		reset();
 	}
 
 	/**
@@ -175,6 +166,14 @@ class Virus extends Entity {
 	boolean isEaten() {
 		return isEaten;
 	}
+	
+	void reset() {
+		isEaten = false;
+		frighten = false;
+		frightCounter = 0;
+		outCounter = 2 + outTime;
+		super.reset();
+	}
 
 	/**
 	 * Updates the direction and coordinates for lowest distance to goal
@@ -188,67 +187,72 @@ class Virus extends Entity {
 		Fields[][] map = model.getMap();
 		byte x = getX();
 		byte y = getY();
-		Direction dir = getDir();
 
-		if (outCounter == 0) {
-
-			if (frighten && !isEaten) {
-				if (frightCounter == 0) {
-					setDir(getDir().getOpposite());
-				}
-				frightCounter = 30;
-				frighten = false;
+		// If in start room
+		if (outCounter > 0) {
+			// either waits to move up
+			if (outCounter-- > 2) {
+				setDir(Direction.STILL);
+			} else {
+				// or moves out
+				setDir(Direction.UP);
 			}
+			super.update();
+			return;
+		}
 
-			// Random behavior if frightened
-			if (frightCounter > 0) {
-				RandomGenerator rgen = new RandomGenerator();
-				xGoal = rgen.nextInt(VacManModel.COLUMNS);
-				yGoal = rgen.nextInt(VacManModel.ROWS);
-				if (--frightCounter == 0) {
-					setDir(getDir().getOpposite());
-				}
-			} else if (isEaten) {
-				xGoal = X_START;
-				yGoal = Y_BACK;
+		// Frightens the virus
+		if (frighten && !isEaten) {
+			if (frightCounter == 0) {
+				setDir(getDir().getOpposite());
 			}
+			frightCounter = 30;
+			frighten = false;
+		} else if (frighten) {
+			frighten = false;
+		}
 
-			if (isEaten && (x == xGoal && y == yGoal || map[y][x] == Fields.GATE)) {
+		// Random behavior if frightened
+		if (frightCounter > 0) {
+			RandomGenerator rgen = new RandomGenerator();
+			xGoal = rgen.nextInt(VacManModel.COLUMNS);
+			yGoal = rgen.nextInt(VacManModel.ROWS);
+			if (--frightCounter == 0) {
+				setDir(getDir().getOpposite());
+			}
+		} else if (isEaten) {
+			xGoal = X_START;
+			yGoal = Y_BACK;
+			
+			if (x == xGoal && y == yGoal || map[y][x] == Fields.GATE) {
 				setDir(Direction.DOWN);
 				if (map[y][x] == Fields.GATE) {
 					isEaten = false;
 					outCounter = 2;
 				}
 				super.update();
-			} else {
-
-				double distance = 1000;
-
-				// Finds the next cell which isnt in the opposite direction and is closest to
-				// the goal cell
-				for (Direction newDir : Direction.getArray()) {
-					if (newDir != dir.getOpposite() && map[y + newDir.Y][x + newDir.X].VALUE >= Fields.EMPTY.VALUE) {
-						int yDiff = Math.abs(y + newDir.Y - yGoal);
-						int xDiff = Math.abs(x + newDir.X - xGoal);
-						double newDistance = Math.sqrt(yDiff * yDiff + xDiff * xDiff);
-						if (newDistance < distance) {
-							setDir(newDir);
-							distance = newDistance;
-						}
-					}
-				}
-
-				super.update(model);
+				return;
 			}
-		} else {
-			// If still in starting room, moves up.
-			if (outCounter-- > 2) {
-				setDir(Direction.STILL);
-			} else {
-				setDir(Direction.UP);
-			}
-			super.update();
 		}
+
+
+		double distance = Integer.MAX_VALUE;
+		Direction dir = getDir();
+
+		// Finds the next cell which isnt in the opposite direction and is closest to
+		// the goal cell
+		for (Direction newDir : Direction.getArray()) {
+			if (newDir != dir.getOpposite() && map[y + newDir.Y][x + newDir.X].VALUE >= Fields.EMPTY.VALUE) {
+				int yDiff = Math.abs(y + newDir.Y - yGoal);
+				int xDiff = Math.abs(x + newDir.X - xGoal);
+				double newDistance = Math.sqrt(yDiff * yDiff + xDiff * xDiff);
+				if (newDistance < distance) {
+					setDir(newDir);
+					distance = newDistance;
+				}
+			}
+		}
+		super.update(model);
 	}
 }
 
@@ -257,10 +261,8 @@ class Virus extends Entity {
  */
 class RandomVirus extends Virus {
 
-	private static final byte XSTART = 13;
-
 	RandomVirus() {
-		super(XSTART, 2);
+		super(13, 2);
 	}
 
 	/**
@@ -277,10 +279,9 @@ class RandomVirus extends Virus {
  * Model for virus which follows the player directly.
  */
 class FollowVirus extends Virus {
-	private static final byte XSTART = 14;
 
 	public FollowVirus() {
-		super(XSTART, 7);
+		super(14, 7);
 	}
 
 	/**
@@ -295,10 +296,9 @@ class FollowVirus extends Virus {
  * Model for virus which follows the player directly.
  */
 class PredictVirus extends Virus {
-	private static final byte XSTART = 14;
 
 	public PredictVirus() {
-		super(XSTART, 12);
+		super(13, 12);
 	}
 
 	/**

@@ -11,7 +11,15 @@ import acm.util.JTFTools;
 
 // TODO animations
 
-class VacManView extends GCompound {
+interface VMView {
+	void draw();
+	void drawFields(Fields[][] map);
+	void update(double ms);
+}
+
+class VacManView extends GCompound implements VMView {
+	
+	VacManModel model;
 
 	static final int FIELD_OFFSET = 50;
 	static final int FIELD_SIZE = 30;
@@ -21,16 +29,18 @@ class VacManView extends GCompound {
 	/** View of Vac-Man. */
 	private VacBody vacMan = new VacBody();
 	/** Array of Ghost bodies. 0 -> RandomVirus */
-	private VirusBody[] virus = { new VirusBody(new GImage("bluevirus.png")), new VirusBody(new GImage("redvirus.png")),
-			new VirusBody(new GImage("pinkvirus.png")) };
+	private VirusBody[] virus = { new VirusBody("bluevirus.png"), new VirusBody("redvirus.png"),
+			new VirusBody("pinkvirus.png") };
 
 	private GLabel scoreDisplay;
 	private LifeDisplay lifeDisplay = new LifeDisplay();
 
-	VacManView() {
+	VacManView(VacManModel model) {
+		this.model = model;
 		scoreDisplay = new GLabel("SCORE: 0");
 		scoreDisplay.setColor(Color.WHITE);
 		scoreDisplay.setFont("Default-20");
+		draw();
 	}
 
 	void reset() {
@@ -42,7 +52,7 @@ class VacManView extends GCompound {
 	 * 
 	 * @param model
 	 */
-	void draw(VacManModel model) {
+	public void draw() {
 
 		drawFields(model.getMap());
 		add(lifeDisplay, FIELD_OFFSET / 2, 10);
@@ -57,16 +67,16 @@ class VacManView extends GCompound {
 		add(vacMan, FIELD_OFFSET / 2 + FIELD_SIZE * vMan.getX(), FIELD_OFFSET + FIELD_SIZE * vMan.getY());
 	}
 
-	void drawFields(Fields[][] map) {
+	public void drawFields(Fields[][] map) {
 
 		removeAll();
 
-		for (int x = 0; x < VacManModel.COLUMNS; x++) {
-			for (int y = 0; y < VacManModel.ROWS; y++) {
+		for (byte x = 0; x < VacManModel.COLUMNS; x++) {
+			for (byte y = 0; y < VacManModel.ROWS; y++) {
 				GCompound field = null;
 				switch (map[y][x]) {
 				case WALL:
-					field = new Wall();
+					field = new Wall(map, x, y);
 					break;
 				case DOT:
 					field = new Dot();
@@ -88,7 +98,7 @@ class VacManView extends GCompound {
 		add(scoreDisplay, this.getWidth() - 3 * FIELD_SIZE, 30);
 	}
 
-	void update(VacManModel model, double ms) {
+	public void update(double ms) {
 		scoreDisplay.setLabel("SCORE: " + model.getScore());
 		lifeDisplay.update(model);
 
@@ -97,17 +107,17 @@ class VacManView extends GCompound {
 			this.virus[i].update(virus[i]);
 		}
 
-		animate(model, ms);
+		animate(ms);
 
 		byte x = model.getVacMan().getX();
 		byte y = model.getVacMan().getY();
-		if (fields[y][x] != null && model.getMap()[y][x] == Fields.EMPTY) {
+		if (fields[y][x] != null && model.getMap()[y][x].VALUE >= Fields.EMPTY.VALUE) {
 			remove(fields[y][x]);
 			fields[y][x] = null;
 		}
 	}
 
-	void animate(VacManModel model, double ms) {
+	private void animate(double ms) {
 		double msPerFrame = ms / FIELD_SIZE;
 
 		Vac vMan = model.getVacMan();
@@ -142,8 +152,8 @@ class VirusBody extends GCompound {
 	private boolean isFrightened = false;
 	private boolean isEaten = false;
 
-	VirusBody(GImage skin) {
-		this.skin = skin;
+	VirusBody(String skinName) {
+		skin = new GImage(skinName);
 		skin.scale(1.5);
 		eaten.scale(1.5);
 		fright.scale(1.5);
@@ -170,31 +180,33 @@ class VirusBody extends GCompound {
 }
 
 class Wall extends GCompound {
-	Wall() {
-		GRect rect = new GRect(VacManView.FIELD_SIZE, VacManView.FIELD_SIZE);
-		rect.setFilled(true);
-		rect.setColor(Color.BLUE);
-		add(rect);
+	Wall(Fields[][] map, byte x, byte y) {
+		String image = "wall";
+		for (Direction dir : Direction.getArray()) {
+			if (dir.arrayCheck(y, x) && map[y + dir.Y][x + dir.X] == Fields.WALL) {
+				image += "1";
+			} else {
+				image += "0";
+			}
+		}
+		try {
+			add(new GImage(image + ".png"));
+		} finally {}
 	}
 }
 
 class Dot extends GCompound {
 	Dot() {
-		int fieldSize = VacManView.FIELD_SIZE;
-		GOval dot = new GOval(fieldSize / 5 * 2, fieldSize / 5 * 2, fieldSize / 5, fieldSize / 5);
-		dot.setFilled(true);
-		dot.setColor(Color.WHITE);
-		add(dot);
+		GImage image = new GImage("coin.png");
+		add(image, 7, 7);
 	}
 }
 
 class Bonus extends GCompound {
 	Bonus() {
-		int fieldSize = VacManView.FIELD_SIZE;
-		GOval dot = new GOval(fieldSize / 3, fieldSize / 3, fieldSize / 3, fieldSize / 3);
-		dot.setFilled(true);
-		dot.setColor(Color.yellow);
-		add(dot);
+		GImage image = new GImage("bonus.png");
+		image.scale(1.5);
+		add(image, 5, 0);
 	}
 }
 
@@ -209,17 +221,17 @@ class Gate extends GCompound {
 }
 
 class LifeDisplay extends GCompound {
-	VacBody[] lives = { new VacBody(), new VacBody(), new VacBody() };
-	byte lifeCount = 3;
+	private VacBody[] lives = { new VacBody(), new VacBody(), new VacBody() };
+	private byte lifeCount = 3;
 
-	public LifeDisplay() {
+	LifeDisplay() {
 		for (byte i = 0; i < lives.length; i++) {
 			add(lives[i], i * VacManView.FIELD_SIZE, 0);
 		}
 	}
 
 	void update(VacManModel model) {
-		if (model.getVacMan().getLives() != lifeCount) {
+		if (model.getVacMan().getLives() != lifeCount && lifeCount >= 0) {
 			lifeCount--;
 			remove(lives[lifeCount]);
 		}

@@ -5,10 +5,14 @@ import de.cau.infprogoo.lighthouse.LighthouseDisplay;
 
 // TODO In Bearbeitung LightHouse
 
-class LighthouseView {
+class LighthouseView implements VMView {
 
 	private LighthouseDisplay display = null;
 	private VacManModel model;
+	
+	public LighthouseView(VacManModel model) {
+		this.model = model;
+	}
 
 	void close() {
 		display.close();
@@ -26,7 +30,7 @@ class LighthouseView {
 		}
 	}
 
-	void update(VacManModel model) {
+	public void update() {
 		// Send data to the display
 		try {
 			this.model = model;
@@ -126,6 +130,22 @@ class LighthouseView {
 			return red;
 		}
 
+	}
+
+	@Override
+	public void draw() {
+		update();
+	}
+
+	@Override
+	public void drawFields(Fields[][] map) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void update(double ms) {
+		update();
 	}
 
 }

@@ -14,25 +14,20 @@ public class VacMan extends GraphicsProgram {
 	public void run() {
 		// Initializes game
 		setBackground(Color.BLACK);
+		
 		VacManModel model = new VacManModel();
+		
+		VacManView view = new VacManView(model);
+		model.addView(view);
+//		LighthouseView lighthouse = new LighthouseView(model);
+//		model.addView(lighthouse);
+		
 		VacManController controller = new VacManController(model);
 
-		setSize((int) model.getView().getWidth() + 75, (int) model.getView().getHeight() + 150);
-		add(model.getView());
+		add(view);
 		addKeyListeners(controller);
-//		model.getLighthouseView().connect();
-//		model.pause();
+		setSize((int) view.getWidth() + 75, (int) view.getHeight() + 150);
 
-		// Game Loop
-		while (true) {
-			if (model.isPaused()) {
-				JTFTools.pause(model.getMsperUpdate());
-			} else {
-				double startTime = System.nanoTime() / 1e6;
-				model.update();
-//				model.getLighthouseView().update(model);
-				model.getView().update(model, startTime + model.getMsperUpdate() - System.nanoTime() / 1e6);
-			}
-		}
+		model.run();
 	}
 }
