@@ -3,15 +3,19 @@ package de.cau.infprogoo.vacman;
 import java.io.IOException;
 import de.cau.infprogoo.lighthouse.LighthouseDisplay;
 
-// TODO In Bearbeitung LightHouse
-
 class LighthouseView implements VMView {
+	
+	static final byte ROWS = 14;
+	static final byte COLUMNS = 28;
 
-	private LighthouseDisplay display = null;
+	private LighthouseDisplay display;
 	private VacManModel model;
+	
+	private Colour[] virus = { new Colour(-1, 0, 0), new Colour(-1, 127, -1), new Colour(0, 0, -1), new Colour(-1, -60, 0)};
 	
 	public LighthouseView(VacManModel model) {
 		this.model = model;
+		connect();
 	}
 
 	void close() {
@@ -22,18 +26,17 @@ class LighthouseView implements VMView {
 		// Try connecting to the display
 		try {
 			display = LighthouseDisplay.getDisplay();
-			display.setUsername("daniel");////////////////////////////////////////////////////////
-			display.setToken("API-TOK_ZrbM-9vUU-VC9K-lyJC-aP/S");////////////////////////////////
+			display.setUsername("josntue");////////////////////////////////////////////////////////
+			display.setToken("API-TOK_O6SE-s3DE-JzEv-6Log-OIQF");////////////////////////////////
 		} catch (Exception e) {
 			System.out.println("Connection failed: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
 
-	public void update() {
+	void update() {
 		// Send data to the display
 		try {
-			this.model = model;
 			display.sendImage(toBytes(toPixels(model.getMap())));
 		} catch (IOException e) {
 			System.out.println("Connection failed: " + e.getMessage());
@@ -41,26 +44,23 @@ class LighthouseView implements VMView {
 		}
 	}
 
-	Colour[][] toPixels(Fields[][] map) {
+	Colour[][] toPixels(Field[][] map) {
 		Colour[][] pixels = new Colour[14][28];
 		// convert map to pixels
 		for (int i = 0; i < 14; i++) {
 			for (int j = 0; j < 28; j++) {
 				switch (map[i][j]) {
 				case WALL:
-					pixels[i][j] = new Colour(0, 0, -1);// blue
+					pixels[i][j] = new Colour(30, 136, -27);// blue
 					break;
 				case DOT:
-					pixels[i][j] = new Colour(0, -1, 0); // green
+					pixels[i][j] = new Colour(127, 127, 0); // yellow
 					break;
 				case BONUS:
 					pixels[i][j] = new Colour(-1, -1, -1); // white
 					break;
 				case GATE:
-					pixels[i][j] = new Colour(127, 127, 127); // grey
-					break;
-				case EMPTY:
-					pixels[i][j] = new Colour(0, 0, 0); // black
+					pixels[i][j] = new Colour(70, 70, 70); // grey
 					break;
 				default:
 					pixels[i][j] = new Colour(0, 0, 0); // black
@@ -71,11 +71,12 @@ class LighthouseView implements VMView {
 		// add Vac
 		pixels[model.getVacMan().getY()][model.getVacMan().getX()] = new Colour(-1, -1, 0); // yellow
 		// add Virus
-		for (Virus vir : model.getVirus()) {
-			if (vir.isFrightened()) {
-				pixels[vir.getY()][vir.getX()] = new Colour(0, -1, -1); // cyan
-			} else {
-				pixels[vir.getY()][vir.getX()] = new Colour(-1, 0, 0); // red
+		Virus[] virus = model.getVirus();
+		for (int i = 0; i < virus.length; i++) {
+			if (virus[i].isFrightened() && !(Virus.getFrightCounter() < 7 && Virus.getFrightCounter() % 2 == 0)) {
+				pixels[virus[i].getY()][virus[i].getX()] = new Colour(0, -1, -1); // cyan
+			} else if (!virus[i].isEaten()){
+				pixels[virus[i].getY()][virus[i].getX()] = this.virus[i];
 			}
 		}
 		return pixels;
@@ -138,14 +139,21 @@ class LighthouseView implements VMView {
 	}
 
 	@Override
-	public void drawFields(Fields[][] map) {
-		// TODO Auto-generated method stub
-		
+	public void drawFields(Field[][] map) {
+		update();
 	}
 
 	@Override
 	public void update(double ms) {
 		update();
+	}
+
+	@Override
+	public void drawEntities() {
+	}
+
+	@Override
+	public void reset() {
 	}
 
 }

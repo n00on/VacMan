@@ -3,7 +3,6 @@ package de.cau.infprogoo.vacman;
 import java.awt.Color;
 
 import acm.program.GraphicsProgram;
-import acm.util.JTFTools;
 
 public class VacMan extends GraphicsProgram {
 
@@ -21,6 +20,8 @@ public class VacMan extends GraphicsProgram {
 		model.addView(view);
 //		LighthouseView lighthouse = new LighthouseView(model);
 //		model.addView(lighthouse);
+		
+//		lighthouse.close();
 		
 		VacManController controller = new VacManController(model);
 

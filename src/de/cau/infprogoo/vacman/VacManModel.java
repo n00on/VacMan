@@ -3,33 +3,39 @@ package de.cau.infprogoo.vacman;
 import java.util.ArrayList;
 
 import acm.util.JTFTools;
-
-// TODO Level/Level, Tunnel
+import acm.util.RandomGenerator;
 
 class VacManModel {
 
-	static final byte ROWS = 14;
-	static final byte COLUMNS = 28;
+	/** MVC Views implementing the VMView interface. */
+	private ArrayList<VMView> views = new ArrayList<>();
 
-	private Vac vacMan = new Vac();
-	private Virus[] virus = { new RandomVirus(), new FollowVirus(), new PredictVirus() };
-	private Fields[][] map = new Fields[ROWS][COLUMNS];
-	
-	private int msPerUpdate = 250;
-	private boolean newLevel = false;
-	private boolean resetPositions = false;
-	private boolean resetGame = false;
+	/** Entities and Map. */
+	private Vac vacMan;
+	private Virus[] virus;
+	private Map map;
+
+	/** Booleans determining update behavior. */
 	private boolean paused = false;
-	private byte dotCounter;
+	private boolean resetPositions = false;
+	private boolean newLevel = false;
+	private boolean resetGame = false;
+
+	private int msPerUpdate = 220;
+	private int level = 1;
 	private int score = 0;
 
-	private ArrayList<VMView> views = new ArrayList<>();
-	
 	public VacManModel() {
 		initMap();
+		vacMan = new Vac(this);
+		Virus[] virus = { new FollowVirus(this), new PredictVirus(this), new BlueVirus(this),
+				new DistanceVirus(this) };
+		this.virus = virus;
 	}
-	
-	// Game Loop
+
+	/**
+	 * Game Loop.
+	 */
 	void run() {
 		while (true) {
 			if (paused) {
@@ -43,11 +49,11 @@ class VacManModel {
 			}
 		}
 	}
-	
+
 	ArrayList<VMView> getViews() {
 		return views;
 	}
-	
+
 	void addView(VMView view) {
 		views.add(view);
 		view.draw();
@@ -65,159 +71,252 @@ class VacManModel {
 		return score;
 	}
 
+	int getLevel() {
+		return level;
+	}
+
 	void pause() {
 		paused = !paused;
 	}
 
-	Fields[][] getMap() {
+	Map getMap() {
 		return map;
 	}
-	
+
 	/**
 	 * Reset vac man and viruses in next update
 	 */
 	void resetPositions() {
 		resetPositions = true;
 	}
-	
+
 	void resetGame() {
+		paused = false;
 		resetGame = true;
-		newLevel = true;
-		resetPositions = true;
-	}
-	
-	void scoreEaten() {
-		score += 200;
 	}
 
-	// updates the entire game state
+	void addScore(int scorePlus) {
+		score += scorePlus;
+		if (scorePlus > 100) {
+			System.out.println(scorePlus);
+		}
+	}
+
+	/** Updates the entire game state. */
 	void update() {
-		
-		if (resetPositions || newLevel) {
-			if (newLevel) {
-				if (resetGame) {
-					msPerUpdate = 250;
-					score = 0;
-					vacMan = new Vac();
-					resetGame = false;
-				}
+
+		if (resetPositions || newLevel || resetGame) {
+			vacMan.reset();
+			Virus.resetAll(virus);
+			resetPositions = false;
+
+			if (newLevel || resetGame) {
+				level++;
+				msPerUpdate -= msPerUpdate / 10;
+				Virus.decreaseFrightTime();
 				initMap();
 				newLevel = false;
+
+				if (resetGame) {
+					level = 1;
+					msPerUpdate = 200;
+					Virus.resetFrightTime();
+					score = 0;
+					vacMan = new Vac(this);
+					resetGame = false;
+					for (VMView view : views) {
+						view.reset();
+					}
+				} else {
+					for (VMView view : views) {
+						view.draw();
+					}
+				}
+
+			} else {
+				for (VMView view : views) {
+					view.drawEntities();
+				}
 			}
-			vacMan.reset();
-			for (Virus vir : virus) {
-				vir.reset();
-			}
-			for (VMView view : views) {
-				view.draw();
-			}
-			resetPositions = false;
 			return;
 		}
 		
+		vacMan.update();
+
+		Virus.updateAll(virus);
+
+		map.update(vacMan.getX(), vacMan.getY());
 		
-		
-		vacMan.update(this);
-		
-		for (Virus vir : virus) {
-			vir.update(this);
+		if (map.getDotCounter() == 0) {
+			newLevel = true;
+			return;
 		}
-		
-		byte x = vacMan.getX();
-		byte y = vacMan.getY();
-		if (map[y][x].VALUE >= Fields.DOT.VALUE) {
-			
-			score += map[y][x].VALUE;
-	
-			if (--dotCounter == 0) {
-				msPerUpdate -= msPerUpdate / 8;
-				newLevel = true;
-				return;
-			} else {
-	
-				if (map[y][x] == Fields.BONUS) {
-					for (Virus vir : virus) {
-						vir.frighten();
-					}
-				}
-		
-				map[y][x] = Fields.EMPTY;
-			}
-		}
-		
-		vacMan.checkHit(this);
 	}
 
+	/** Initiates standard map. */
 	private void initMap() {
+		this.map = Map.getMap(this);
+	}
+
+	/** Game Over map. */
+	void gameOver() {
+		resetPositions = true;
+		paused = true;
+		
+		byte[] virusXStart = {13, 14};
+		this.map = new Map(this, Map.getGameOver(), 13, 11, virusXStart, 6, 4);
+		for (VMView view : views) {
+			view.drawFields(this.map);
+		}
+	}
+}
+
+class Map {
 	
-		Fields w = Fields.WALL;
-		Fields d = Fields.DOT;
-		Fields g = Fields.GATE;
-		Fields b = Fields.BONUS;
-		Fields e = Fields.EMPTY;
+	final int ROWS;
+	final int COLUMNS;
 	
-		Fields[][] map = { 
-				{ w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w },
-				{ w, b, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, b, w },
-				{ w, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, w },
-				{ w, d, w, w, w, d, d, w, w, d, w, w, e, w, w, e, w, w, d, w, w, d, d, w, w, w, d, w },
-				{ w, d, d, d, w, w, d, d, d, d, e, e, e, e, e, e, e, e, d, d, d, d, w, w, d, d, d, w },
-				{ w, w, w, d, d, d, d, w, w, d, w, e, w, g, g, w, e, w, d, w, w, d, d, d, d, w, w, w },
-				{ w, e, w, d, d, w, d, d, w, d, w, e, w, e, e, w, e, w, d, w, d, d, w, d, d, w, e, w },
-				{ w, w, w, w, d, w, w, d, d, d, w, e, w, w, w, w, e, w, d, d, d, w, w, d, w, w, w, w },
-				{ w, d, d, d, d, d, w, d, w, d, e, e, e, e, e, e, e, e, d, w, d, w, d, d, d, d, d, w },
-				{ w, d, w, w, w, d, d, d, w, d, w, e, w, w, w, w, e, w, d, w, d, d, d, w, w, w, d, w },
-				{ w, d, d, d, d, d, w, d, w, d, w, d, d, d, d, d, d, w, d, w, d, w, d, d, d, d, d, w },
-				{ w, d, w, w, w, w, w, d, d, d, w, w, w, e, e, w, w, w, d, d, d, w, w, w, w, w, d, w },
-				{ w, b, d, d, d, d, d, d, w, d, d, d, d, e, e, d, d, d, d, w, d, d, d, d, d, d, b, w },
-				{ w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w } };
+	private VacManModel model;
+	private Field[][] map;
 	
-		dotCounter = 0;
-		for (int x = 0; x < VacManModel.COLUMNS; x++) {
-			for (int y = 0; y < VacManModel.ROWS; y++) {
-				if (map[y][x].VALUE >= d.VALUE) {
+	final byte vacXStart;
+	final byte vacYStart;
+	private final byte[] virusXStart;
+	final byte virusYStart;
+	final byte virusYBack;
+	
+	private int dotCounter = 0;
+	
+	int getDotCounter() {
+		return dotCounter;
+	}
+	
+	Field get(byte x, byte y) {
+		return map[(y + ROWS) % ROWS][(x + COLUMNS) % COLUMNS];
+	}
+	
+	byte getVirusStartX() {
+		return virusXStart[RandomGenerator.getInstance().nextInt(virusXStart.length)];
+	}
+	
+	Map(VacManModel model, Field[][] map, int vacXStart, int vacYStart, byte[] virusXStart, int virusYStart, int virusYBack) {
+		this.model = model;
+		this.map = map;
+		this.vacXStart = (byte) vacXStart;
+		this.vacYStart = (byte) vacYStart;
+		this.virusXStart = virusXStart;
+		this.virusYStart = (byte) virusYStart;
+		this.virusYBack = (byte) virusYBack;
+		
+		ROWS = map.length;
+		COLUMNS = map[0].length;
+		
+		for (int x = 0; x < COLUMNS; x++) {
+			for (int y = 0; y < ROWS; y++) {
+				if (map[y][x].VALUE >= Field.DOT.VALUE) {
 					dotCounter++;
 				}
 			}
 		}
-		this.map = map;
 	}
+	
+	void update(byte x, byte y) {
+		
+		if (map[y][x].VALUE >= Field.DOT.VALUE) {
+			
+			dotCounter--;
 
-	// game over
-	void gameOver() {
-		Fields w = Fields.WALL;
-		Fields e = Fields.EMPTY;
-		map = new Fields[][] { { e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
+			model.addScore(map[y][x].VALUE);
+
+			if (map[y][x] == Field.BONUS) {
+				Virus.frighten();
+			}
+
+			map[y][x] = Field.EMPTY;
+		}
+	}
+	
+	static private Field w = Field.WALL;
+	static private Field d = Field.DOT;
+	static private Field g = Field.GATE;
+	static private Field b = Field.BONUS;
+	static private Field e = Field.EMPTY;
+	
+	static Map getMap(VacManModel model) {
+		Field[][] map = { { w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w },
+		{ w, b, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, b, w },
+		{ w, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, w },
+		{ w, d, w, w, w, d, d, w, w, d, w, w, e, w, w, e, w, w, d, w, w, d, d, w, w, w, d, w },
+		{ w, d, d, d, w, w, d, d, d, d, e, e, e, e, e, e, e, e, d, d, d, d, w, w, d, d, d, w },
+		{ w, w, w, d, d, d, d, w, w, d, w, e, w, g, g, w, e, w, d, w, w, d, d, d, d, w, w, w },
+		{ e, e, e, d, d, w, d, d, w, d, w, e, w, e, e, w, e, w, d, w, d, d, w, d, d, e, e, e },
+		{ w, w, w, w, d, w, w, d, d, d, w, e, w, w, w, w, e, w, d, d, d, w, w, d, w, w, w, w },
+		{ w, d, d, d, d, d, w, d, w, d, e, e, e, e, e, e, e, e, d, w, d, w, d, d, d, d, d, w },
+		{ w, d, w, w, w, d, d, d, w, w, w, e, w, w, w, w, e, w, w, w, d, d, d, w, w, w, d, w },
+		{ w, d, d, d, d, d, w, d, w, d, d, d, d, d, d, d, d, d, d, w, d, w, d, d, d, d, d, w },
+		{ w, d, w, w, w, w, w, d, d, d, w, w, w, e, e, w, w, w, d, d, d, w, w, w, w, w, d, w },
+		{ w, b, d, d, d, d, d, d, w, d, d, d, d, d, d, d, d, d, d, w, d, d, d, d, d, d, b, w },
+		{ w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w } };
+		
+		byte[] virusXStart = {13, 14};
+		return new Map(model, map, 13, 11, virusXStart, 6, 4);
+
+//		Field[][] map = { { w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
+//				{ w, d, d, d, d, d, d, d, d, w, d, d, d, d, d, d, d, d, w},
+//				{ w, b, w, w, d, w, w, w, d, w, d, w, w, w, d, w, w, b, w},
+//				{ w, d, w, w, d, w, w, w, d, w, d, w, w, w, d, w, w, d, w},
+//				{ w, d, d, d, d, d, d, d, d, d, d, d, d, d, d, d, d, d, w},
+//				{ w, d, w, w, d, w, d, w, w, w, w, w, d, w, d, w, w, d, w},
+//				{ w, d, d, d, d, w, d, d, d, w, d, d, d, w, d, d, d, d, w},
+//				{ w, w, w, w, d, w, w, w, d, w, d, w, w, w, d, w, w, w, w},
+//				{ w, w, w, w, d, w, e, e, e, e, e, e, e, w, d, w, w, w, w},
+//				{ w, w, w, w, d, w, e, w, w, g, w, w, e, w, d, w, w, w, w},
+//				{ e, e, e, e, d, e, e, w, e, e, e, w, e, e, d, e, e, e, e},
+//				{ w, w, w, w, d, w, e, w, w, w, w, w, e, w, d, w, w, w, w},
+//				{ w, w, w, w, d, w, e, e, e, e, e, e, e, w, d, w, w, w, w},
+//				{ w, w, w, w, d, w, e, w, w, w, w, w, e, w, d, w, w, w, w},
+//				{ w, d, d, d, d, d, d, d, d, w, d, d, d, d, d, d, d, d, w},
+//				{ w, d, w, w, d, w, w, w, d, w, d, w, w, w, d, w, w, d, w},
+//				{ w, b, d, w, d, d, d, d, d, d, d, d, d, d, d, w, d, b, w},
+//				{ w, w, d, w, d, w, d, w, w, w, w, w, d, w, d, w, d, w, w},
+//				{ w, d, d, d, d, w, d, d, d, w, d, d, d, w, d, d, d, d, w},
+//				{ w, d, w, w, w, w, w, w, d, w, d, w, w, w, w, w, w, d, w},
+//				{ w, d, d, d, d, d, d, d, d, d, d, d, d, d, d, d, d, d, w},
+//				{ w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w} };
+//		
+//		byte[] virusXStart = {8, 9, 10};
+//		return new Map(model, map, 9, 16, virusXStart, 10, 8);
+	}
+	
+	static Field[][] getGameOver() {
+		Field[][] map = { { e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
 				{ e, e, e, e, w, w, w, e, e, e, w, w, w, e, e, w, e, e, e, w, e, w, w, w, w, e, e, e },
-				{ e, e, e, w, w, e, e, e, e, w, w, e, w, w, e, w, w, w, w, w, e, w, e, e, e, e, e, e },
-				{ e, e, e, w, e, e, w, w, e, w, e, e, e, w, e, w, e, w, e, w, e, w, w, w, w, e, e, e },
-				{ e, e, e, w, w, e, e, w, e, w, w, w, w, w, e, w, e, e, e, w, e, w, e, e, e, e, e, e },
+				{ e, e, e, w, w, e, e, e, e, w, w, d, w, w, e, w, w, w, w, w, e, w, e, e, e, e, e, e },
+				{ e, e, e, w, e, e, w, w, e, w, d, b, d, w, e, w, e, w, e, w, e, w, w, w, w, e, e, e },
+				{ e, e, e, w, w, e, b, w, e, w, w, w, w, w, e, w, e, e, e, w, e, w, e, e, e, e, e, e },
 				{ e, e, e, e, w, w, w, w, e, w, e, e, e, w, e, w, e, e, e, w, e, w, w, w, w, e, e, e },
 				{ e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
 				{ e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e },
-				{ e, e, e, e, w, w, w, e, e, w, e, e, e, w, e, w, w, w, w, e, w, w, w, e, e, e, e, e },
-				{ e, e, e, w, w, e, w, w, e, w, w, e, w, w, e, w, e, e, e, e, w, e, w, e, e, e, e, e },
-				{ e, e, e, w, e, e, e, w, e, e, w, e, w, e, e, w, w, w, w, e, w, w, w, w, e, e, e, e },
-				{ e, e, e, w, w, e, w, w, e, e, w, w, w, e, e, w, e, e, e, e, w, e, e, w, e, e, e, e },
-				{ e, e, e, e, w, w, w, e, e, e, e, w, e, e, e, w, w, w, w, e, w, e, e, w, e, e, e, e },
+				{ e, e, e, e, w, w, w, e, e, w, e, e, e, w, e, w, w, w, w, w, e, w, w, w, e, e, e, e },
+				{ e, e, e, w, w, d, w, w, e, w, w, e, w, w, e, w, e, e, e, e, e, w, b, w, e, e, e, e },
+				{ e, e, e, w, d, b, d, w, e, e, w, e, w, e, e, w, w, w, w, w, e, w, w, w, w, e, e, e },
+				{ e, e, e, w, w, d, w, w, e, e, w, w, w, e, e, w, e, e, e, e, e, w, e, e, w, e, e, e },
+				{ e, e, e, e, w, w, w, e, e, e, e, w, e, e, e, w, w, w, w, w, e, w, e, e, w, e, e, e },
 				{ e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e } };
-		for (VMView view : views) {
-			view.drawFields(map);
-		}
-//		lighthouseView.close();
+		return map;
 	}
 }
 
 /**
  * Enumeration of field types.
  */
-enum Fields {
+enum Field {
 	WALL(-2), GATE(-1), EMPTY(0), DOT(10), BONUS(50);
 
-	/** Field value for comparing reasons and point score value. */
+	/** Field value for comparing and point score value. */
 	final byte VALUE;
 
-	private Fields(int value) {
+	private Field(int value) {
 		VALUE = (byte) value;
 	}
 }
@@ -247,19 +346,20 @@ enum Direction {
 	}
 
 	/**
-	 * Checks if next step in this direction is in the map array.
-	 * 
-	 * @param y
-	 * @param x
-	 * @return
+	 * Checks if next step in this direction is over the edge.
 	 */
-	boolean arrayCheck(byte y, byte x) {
-		return X + x >= 0 && X + x < VacManModel.COLUMNS && Y + y >= 0 && Y + y < VacManModel.ROWS;
+	boolean mapCheck(Map map, byte y, byte x) {
+		return X + x >= 0 && X + x < map.COLUMNS && Y + y >= 0 && Y + y < map.ROWS;
 	}
 
-	/**
-	 * @return opposite direction
-	 */
+	byte nextX(Map map, byte x) {
+		return (byte) ((x + X + map.COLUMNS) % map.COLUMNS);
+	}
+
+	byte nextY(Map map, byte y) {
+		return (byte) ((y + Y + map.ROWS) % map.ROWS);
+	}
+
 	Direction getOpposite() {
 		switch (this) {
 		case UP:
@@ -270,7 +370,7 @@ enum Direction {
 			return LEFT;
 		case LEFT:
 			return RIGHT;
-		default:
+		default: // returns STILL for STILL
 			return this;
 		}
 	}
