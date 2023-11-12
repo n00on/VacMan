@@ -1,0 +1,28 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets.main.java.srcDirs = ['src']
+
+group 'de.cau'
+version '0.1.0'
+
+dependencies {
+    implementation files('lib/acm-2.1.jar')
+    implementation 'org.eclipse.jetty:jetty-client:9.4.48.v20220622'
+    implementation 'org.eclipse.jetty:jetty-http:9.4.51.v20230217'
+    implementation 'org.eclipse.jetty:jetty-io:9.4.39.v20210325'
+    implementation 'org.eclipse.jetty:jetty-util:9.4.51.v20230217'
+    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.8.v20171121'
+    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.8.v20171121'
+    implementation 'org.eclipse.jetty.websocket:websocket-common:9.4.8.v20171121'
+    implementation 'org.msgpack:msgpack-core:0.8.14'
+}
+
+application {
+    mainClass = 'de.cau.infprogoo.vacman.VacMan'
+}

@@ -10,6 +10,7 @@ public class VacMan extends GraphicsProgram {
 		new VacMan().start();
 	}
 
+	@Override
 	public void run() {
 		// Initializes game
 		setBackground(Color.BLACK);
@@ -18,10 +19,10 @@ public class VacMan extends GraphicsProgram {
 		
 		VacManView view = new VacManView(model);
 		model.addView(view);
-//		LighthouseView lighthouse = new LighthouseView(model);
-//		model.addView(lighthouse);
+		LighthouseView lighthouse = new LighthouseView(model);
+		model.addView(lighthouse);
 		
-//		lighthouse.close();
+		// lighthouse.close();
 		
 		VacManController controller = new VacManController(model);
 

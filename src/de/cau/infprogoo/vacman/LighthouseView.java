@@ -44,12 +44,12 @@ class LighthouseView implements VMView {
 		}
 	}
 
-	Colour[][] toPixels(Field[][] map) {
+	Colour[][] toPixels(Map map) {
 		Colour[][] pixels = new Colour[14][28];
 		// convert map to pixels
-		for (int i = 0; i < 14; i++) {
-			for (int j = 0; j < 28; j++) {
-				switch (map[i][j]) {
+		for (byte i = 0; i < 14; i++) {
+			for (byte j = 0; j < 28; j++) {
+				switch (map.get(i, j)) {
 				case WALL:
 					pixels[i][j] = new Colour(30, 136, -27);// blue
 					break;
@@ -139,7 +139,7 @@ class LighthouseView implements VMView {
 	}
 
 	@Override
-	public void drawFields(Field[][] map) {
+	public void drawFields(Map map) {
 		update();
 	}
 
