@@ -1,11 +1,14 @@
 package de.cau.infprogoo.vacman;
 
+import de.cau.infprogoo.vacman.model.Direction;
+import de.cau.infprogoo.vacman.model.VacManModel;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 class VacManController implements KeyListener {
 
-	private VacManModel model;
+	private final VacManModel model;
 
 	VacManController(VacManModel model) {
 		this.model = model;
@@ -17,20 +20,16 @@ class VacManController implements KeyListener {
 		case KeyEvent.VK_SPACE:
 			model.pause();
 			break;
-		case KeyEvent.VK_W:
-		case KeyEvent.VK_UP:
+		case KeyEvent.VK_W, KeyEvent.VK_UP:
 			model.getVacMan().setNextDir(Direction.UP);
 			break;
-		case KeyEvent.VK_A:
-		case KeyEvent.VK_LEFT:
+		case KeyEvent.VK_A, KeyEvent.VK_LEFT:
 			model.getVacMan().setNextDir(Direction.LEFT);
 			break;
-		case KeyEvent.VK_S:
-		case KeyEvent.VK_DOWN:
+		case KeyEvent.VK_S, KeyEvent.VK_DOWN:
 			model.getVacMan().setNextDir(Direction.DOWN);
 			break;
-		case KeyEvent.VK_D:
-		case KeyEvent.VK_RIGHT:
+		case KeyEvent.VK_D, KeyEvent.VK_RIGHT:
 			model.getVacMan().setNextDir(Direction.RIGHT);
 			break;
 		case KeyEvent.VK_R:
