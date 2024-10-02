@@ -1,56 +1,37 @@
 package de.cau.infprogoo.vacman.view;
 
-import java.io.IOException;
-
-import de.cau.infprogoo.lighthouse.LighthouseDisplay;
 import de.cau.infprogoo.vacman.model.Map;
 import de.cau.infprogoo.vacman.model.VacManModel;
 import de.cau.infprogoo.vacman.model.entity.Virus;
 import de.cau.infprogoo.vacman.view.standard.VMView;
+import org.jighthouse.Jighthouse;
 
 public class LighthouseView implements VMView {
 
     static final byte ROWS = 14;
     static final byte COLUMNS = 28;
 
-    private LighthouseDisplay display;
     private final VacManModel model;
 
-    /**
-     * Username for Lighthouse API
-     */
-    private final String username;
-    /**
-     * Token for Lighthouse API
-     */
-    private final String token;
+    private final Jighthouse jighthouse;
 
     private final Colour[] viruses = {new Colour(-1, 0, 0), new Colour(-1, 127, -1), new Colour(0, 0, -1), new Colour(-1, -60, 0)};
 
-    public LighthouseView(VacManModel model, String username, String token) throws Exception {
+    public LighthouseView(VacManModel model, String username, String token) {
+        jighthouse = new Jighthouse(username, token);
         this.model = model;
-        this.username = username;
-        this.token = token;
-        connect();
+        jighthouse.start();
     }
 
-    void close() {
-        display.close();
-    }
-
-    void connect() throws Exception {
-        // Try connecting to the display
-        display = LighthouseDisplay.getDisplay();
-        display.setUsername(username);////////////////////////////////////////////////////////
-        display.setToken(token);////////////////////////////////
-
+    void stop() {
+        jighthouse.stop();
     }
 
     void update() {
         // Send data to the display
         try {
-            display.sendImage(toBytes(toPixels(model.getMap())));
-        } catch (IOException e) {
+            jighthouse.sendFrame(toBytes(toPixels(model.getMap())));
+        } catch (Exception e) {
             System.out.println("Connection failed: " + e.getMessage());
             e.printStackTrace();
         }
@@ -59,9 +40,9 @@ public class LighthouseView implements VMView {
     Colour[][] toPixels(Map map) {
         Colour[][] pixels = new Colour[14][28];
         // convert map to pixels
-        for (byte i = 0; i < ROWS; i++) {
-            for (byte j = 0; j < COLUMNS; j++) {
-                pixels[i][j] = switch (map.get(i, j)) {
+        for (byte y = 0; y < ROWS; y++) {
+            for (byte x = 0; x < COLUMNS; x++) {
+                pixels[y][x] = switch (map.get(y, x)) {
                     case WALL -> new Colour(30, 136, -27);// blue
                     case DOT -> new Colour(127, 127, 0); // yellow
                     case BONUS -> new Colour(-1, -1, -1); // white
@@ -91,11 +72,11 @@ public class LighthouseView implements VMView {
         // send(...) method.
         byte[] bytes = new byte[ROWS * COLUMNS * 3];
         int k = 0;
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLUMNS; j++) {
-                bytes[k] = pixels[i][j].getRed();
-                bytes[k + 1] = pixels[i][j].getGreen();
-                bytes[k + 2] = pixels[i][j].getBlue();
+        for (int x = 0; x < COLUMNS; x++) {
+            for (int y = 0; y < ROWS; y++) {
+                bytes[k] = pixels[y][x].getRed();
+                bytes[k + 1] = pixels[y][x].getGreen();
+                bytes[k + 2] = pixels[y][x].getBlue();
                 k += 3;
             }
         }

@@ -6,15 +6,17 @@ import de.cau.infprogoo.vacman.model.entity.Virus;
 
 class VirusBody extends GCompound {
 
+    static final String IMAGE_GROUP = "virus/";
+
     private final GImage skin;
-    private final GImage fright = new VacImage("frightvirus");
-    private final GImage eaten = new VacImage("eatenvirus");
+    private final GImage fright = new VacImage("frightvirus", IMAGE_GROUP);
+    private final GImage eaten = new VacImage("eatenvirus", IMAGE_GROUP);
 
     private boolean isFrightened = false;
     private boolean isEaten = false;
 
     VirusBody(String texture) {
-        skin = new VacImage(texture);
+        skin = new VacImage(texture, IMAGE_GROUP);
         skin.scale(1.5);
         eaten.scale(1.5);
         fright.scale(1.5);

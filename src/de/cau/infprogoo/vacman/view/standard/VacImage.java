@@ -9,4 +9,8 @@ class VacImage extends GImage {
     VacImage(String path) {
         super(ASSET_PATH + path + ".png");
     }
+
+    VacImage(String path, String group) {
+        super(ASSET_PATH + group + path + ".png");
+    }
 }
