@@ -5,8 +5,12 @@ import de.cau.infprogoo.vacman.model.VacManModel;
 import de.cau.infprogoo.vacman.model.entity.Virus;
 import de.cau.infprogoo.vacman.view.standard.VMView;
 import org.jighthouse.Jighthouse;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class LighthouseView implements VMView {
+
+    private static final Logger logger = LogManager.getLogger(LighthouseView.class);
 
     static final byte ROWS = 14;
     static final byte COLUMNS = 28;
@@ -32,8 +36,7 @@ public class LighthouseView implements VMView {
         try {
             jighthouse.sendFrame(toBytes(toPixels(model.getMap())));
         } catch (Exception e) {
-            System.out.println("Connection failed: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Connection failed: ", e);
         }
     }
 
@@ -42,7 +45,7 @@ public class LighthouseView implements VMView {
         // convert map to pixels
         for (byte y = 0; y < ROWS; y++) {
             for (byte x = 0; x < COLUMNS; x++) {
-                pixels[y][x] = switch (map.get(y, x)) {
+                pixels[y][x] = switch (map.get(x, y)) {
                     case WALL -> new Colour(30, 136, -27);// blue
                     case DOT -> new Colour(127, 127, 0); // yellow
                     case BONUS -> new Colour(-1, -1, -1); // white

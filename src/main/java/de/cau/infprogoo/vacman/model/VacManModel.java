@@ -5,8 +5,13 @@ import java.util.ArrayList;
 import acm.util.JTFTools;
 import de.cau.infprogoo.vacman.model.entity.*;
 import de.cau.infprogoo.vacman.view.standard.VMView;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class VacManModel {
+
+
+    private static final Logger logger = LogManager.getLogger(VacManModel.class);
 
     /**
      * MVC Views implementing the VMView interface.
@@ -104,7 +109,7 @@ public class VacManModel {
     public void addScore(int scorePlus) {
         score += scorePlus;
         if (scorePlus > 100) {
-            System.out.println(scorePlus);
+            logger.debug("100+ points: {}", scorePlus);
         }
     }
 

@@ -5,11 +5,15 @@ import de.cau.infprogoo.vacman.model.Direction;
 import de.cau.infprogoo.vacman.model.Field;
 import de.cau.infprogoo.vacman.model.Map;
 import de.cau.infprogoo.vacman.model.VacManModel;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Direct superclass for individual virus.
  */
 public abstract class Virus extends Entity {
+
+    private static final Logger logger = LogManager.getLogger(Virus.class);
 
     private static boolean frighten = false;
     private static byte frightTime = 26;
@@ -20,25 +24,25 @@ public abstract class Virus extends Entity {
     private static byte phase = 0;
     private static byte phaseCounter = phaseTimes[phase];
 
-    public static void updateAll(Virus[] virus) {
+    public static void updateAll(Virus[] viruses) {
 
         if (frighten) {
-            frightenAll(virus);
+            frightenAll(viruses);
         } else if (frightCounter > 0) {
             if (--frightCounter == 0) {
                 killStreak = 0;
-                for (Virus vir : virus) {
+                for (Virus vir : viruses) {
                     vir.isFrightened = false;
                 }
             }
         } else if (phaseCounter == 0) {
-            changePhase(virus);
+            changePhase(viruses);
         } else if (phaseCounter > 0) {
             // Only counts if frightCounter == 0
             phaseCounter--;
         }
 
-        for (Virus vir : virus) {
+        for (Virus vir : viruses) {
             if (!vir.isFrightened || frightCounter % 2 == 0) {
                 vir.update();
             }
@@ -48,28 +52,28 @@ public abstract class Virus extends Entity {
         }
     }
 
-    public static void frightenAll(Virus[] virus) {
+    public static void frightenAll(Virus[] viruses) {
         frighten = false;
         killStreak = 0;
         frightCounter = (byte) (frightTime + frightCounter % 2);
-        for (Virus vir : virus) {
-            if (!vir.isEaten) {
-                if (!vir.isFrightened) {
-                    vir.setDir(vir.getDir().getOpposite());
+        for (Virus virus : viruses) {
+            if (!virus.isEaten) {
+                if (!virus.isFrightened) {
+                    virus.setDir(virus.getDir().getOpposite());
                 }
-                vir.isFrightened = true;
+                virus.isFrightened = true;
             }
         }
     }
 
-    static void changePhase(Virus[] virus) {
-        for (Virus vir : virus) {
-            if (!vir.isEaten && !vir.isFrightened) {
-                vir.setDir(vir.getDir().getOpposite());
+    static void changePhase(Virus[] viruses) {
+        for (Virus virus : viruses) {
+            if (!virus.isEaten && !virus.isFrightened) {
+                virus.setDir(virus.getDir().getOpposite());
             }
         }
         phaseCounter = phaseTimes[++phase];
-        System.out.println(phase);
+        logger.debug("Phase: {}", phase);
     }
 
     public static void resetAll(Virus[] virus) {

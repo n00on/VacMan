@@ -5,8 +5,13 @@ import acm.util.ErrorException;
 import de.cau.infprogoo.vacman.model.Direction;
 import de.cau.infprogoo.vacman.model.Field;
 import de.cau.infprogoo.vacman.model.Map;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 class Wall extends GCompound {
+
+    private static final Logger logger = LogManager.getLogger(Wall.class);
+
     Wall(Map map, byte x, byte y) {
         StringBuilder image = new StringBuilder("wall/wall");
         for (Direction dir : Direction.getArray()) {
@@ -19,7 +24,7 @@ class Wall extends GCompound {
         try {
             add(new VacImage(image.toString()));
         } catch (ErrorException e) {
-            System.err.println(e.getMessage());
+           logger.error("Failed to add VacImage: ", e);
         }
     }
 }

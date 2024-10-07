@@ -6,8 +6,12 @@ import acm.program.GraphicsProgram;
 import de.cau.infprogoo.vacman.model.VacManModel;
 import de.cau.infprogoo.vacman.view.LighthouseView;
 import de.cau.infprogoo.vacman.view.standard.VacManView;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class VacMan extends GraphicsProgram {
+
+	private static final Logger logger = LogManager.getLogger(VacMan.class);
 
 	public static void main(String[] args) {
 		new VacMan().start();
@@ -41,8 +45,7 @@ public class VacMan extends GraphicsProgram {
 			LighthouseView lighthouse = new LighthouseView(model, username, token);
 			model.addView(lighthouse);
 		} catch (Exception e) {
-			System.out.println("Connection failed: " + e.getMessage());
-			e.printStackTrace();
+			logger.error("Connection failed: ", e);
 		}
 	}
 }
