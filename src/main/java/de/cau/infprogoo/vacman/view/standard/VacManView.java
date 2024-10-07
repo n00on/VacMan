@@ -61,7 +61,7 @@ public class VacManView extends GCompound implements VMView {
 
     }
 
-    public void drawFields(Map map) {
+    public void drawFields(VacMap map) {
 
         removeAll();
 

@@ -3,7 +3,7 @@ package de.cau.infprogoo.vacman.model.entity;
 import acm.util.RandomGenerator;
 import de.cau.infprogoo.vacman.model.Direction;
 import de.cau.infprogoo.vacman.model.Field;
-import de.cau.infprogoo.vacman.model.Map;
+import de.cau.infprogoo.vacman.model.VacMap;
 import de.cau.infprogoo.vacman.model.VacManModel;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -160,7 +160,7 @@ public abstract class Virus extends Entity {
      * Updates the direction and field for lowest distance to the goal field.
      */
     void update(int xGoal, int yGoal) {
-        Map map = model.getMap();
+        VacMap map = model.getMap();
         byte x = getX();
         byte y = getY();
 
@@ -200,7 +200,7 @@ public abstract class Virus extends Entity {
     }
 
     private void setNextDir(int xGoal, int yGoal) {
-        Map map = model.getMap();
+        VacMap map = model.getMap();
         byte x = getX();
         byte y = getY();
 

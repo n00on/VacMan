@@ -3,7 +3,7 @@ package de.cau.infprogoo.vacman.model;
 import acm.util.RandomGenerator;
 import de.cau.infprogoo.vacman.model.entity.Virus;
 
-public class Map {
+public class VacMap {
 
     public final int rows;
     public final int columns;
@@ -31,7 +31,7 @@ public class Map {
         return virusXStart[RandomGenerator.getInstance().nextInt(virusXStart.length)];
     }
 
-    Map(VacManModel model, Field[][] mapFields, int vacXStart, int vacYStart, byte[] virusXStart, int virusYStart, int virusYBack) {
+    VacMap(VacManModel model, Field[][] mapFields, int vacXStart, int vacYStart, byte[] virusXStart, int virusYStart, int virusYBack) {
         this.model = model;
         this.mapFields = mapFields;
         this.vacXStart = (byte) vacXStart;
@@ -74,7 +74,7 @@ public class Map {
     private static final Field b = Field.BONUS;
     private static final Field e = Field.EMPTY;
 
-    static Map getMap(VacManModel model) {
+    static VacMap getMap(VacManModel model) {
         Field[][] map = {{w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
                 {w, b, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, b, w},
                 {w, d, w, d, d, d, w, w, d, d, d, w, d, d, d, d, w, d, d, d, w, w, d, d, d, w, d, w},
@@ -91,7 +91,7 @@ public class Map {
                 {w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w}};
 
         byte[] virusXStart = {13, 14};
-        return new Map(model, map, 13, 11, virusXStart, 6, 4);
+        return new VacMap(model, map, 13, 11, virusXStart, 6, 4);
 
 //		Field[][] map = { { w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w},
 //				{ w, d, d, d, d, d, d, d, d, w, d, d, d, d, d, d, d, d, w},

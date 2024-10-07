@@ -23,7 +23,7 @@ public class VacManModel {
      */
     private Vac vacMan;
     private final Virus[] virus;
-    private Map map;
+    private VacMap map;
 
     /**
      * Booleans determining update behavior.
@@ -90,7 +90,7 @@ public class VacManModel {
         paused = !paused;
     }
 
-    public Map getMap() {
+    public VacMap getMap() {
         return map;
     }
 
@@ -169,7 +169,7 @@ public class VacManModel {
      * Initiates standard map.
      */
     private void initMap() {
-        this.map = Map.getMap(this);
+        this.map = VacMap.getMap(this);
     }
 
     /**
@@ -180,7 +180,7 @@ public class VacManModel {
         paused = true;
 
         byte[] virusXStart = {13, 14};
-        this.map = new Map(this, Map.getGameOver(), 13, 11, virusXStart, 6, 4);
+        this.map = new VacMap(this, VacMap.getGameOver(), 13, 11, virusXStart, 6, 4);
         for (VMView view : views) {
             view.drawFields(this.map);
         }

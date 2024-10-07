@@ -30,30 +30,25 @@ public enum Direction {
     /**
      * Checks if next step in this direction is over the edge.
      */
-    public boolean mapCheck(Map map, byte y, byte x) {
+    public boolean mapCheck(VacMap map, byte y, byte x) {
         return this.x + x >= 0 && this.x + x < map.columns && this.y + y >= 0 && this.y + y < map.rows;
     }
 
-    public byte nextX(Map map, byte x) {
+    public byte nextX(VacMap map, byte x) {
         return (byte) ((x + this.x + map.columns) % map.columns);
     }
 
-    public byte nextY(Map map, byte y) {
+    public byte nextY(VacMap map, byte y) {
         return (byte) ((y + this.y + map.rows) % map.rows);
     }
 
     public Direction getOpposite() {
-        switch (this) {
-            case UP:
-                return DOWN;
-            case DOWN:
-                return UP;
-            case RIGHT:
-                return LEFT;
-            case LEFT:
-                return RIGHT;
-            default: // returns STILL for STILL
-                return this;
-        }
+        return switch (this) {
+            case UP -> DOWN;
+            case DOWN -> UP;
+            case RIGHT -> LEFT;
+            case LEFT -> RIGHT;
+            default -> this; // returns STILL for STILL
+        };
     }
 }

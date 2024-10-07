@@ -1,6 +1,6 @@
 package de.cau.infprogoo.vacman.view;
 
-import de.cau.infprogoo.vacman.model.Map;
+import de.cau.infprogoo.vacman.model.VacMap;
 import de.cau.infprogoo.vacman.model.VacManModel;
 import de.cau.infprogoo.vacman.model.entity.Virus;
 import de.cau.infprogoo.vacman.view.standard.VMView;
@@ -40,7 +40,7 @@ public class LighthouseView implements VMView {
         }
     }
 
-    Colour[][] toPixels(Map map) {
+    Colour[][] toPixels(VacMap map) {
         Colour[][] pixels = new Colour[14][28];
         // convert map to pixels
         for (byte y = 0; y < ROWS; y++) {
@@ -122,7 +122,7 @@ public class LighthouseView implements VMView {
     }
 
     @Override
-    public void drawFields(Map map) {
+    public void drawFields(VacMap map) {
         update();
     }
 

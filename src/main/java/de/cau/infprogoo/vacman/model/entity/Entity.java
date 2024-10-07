@@ -2,7 +2,7 @@ package de.cau.infprogoo.vacman.model.entity;
 
 import de.cau.infprogoo.vacman.model.Direction;
 import de.cau.infprogoo.vacman.model.Field;
-import de.cau.infprogoo.vacman.model.Map;
+import de.cau.infprogoo.vacman.model.VacMap;
 import de.cau.infprogoo.vacman.model.VacManModel;
 
 /**
@@ -50,7 +50,7 @@ abstract class Entity {
 	 * Updates considering the goal field.
 	 */
 	void update() {
-		Map map = model.getMap();
+		VacMap map = model.getMap();
 
         tunneling = !dir.mapCheck(map, y, x);
 		if (map.get(dir.nextX(map, x), dir.nextY(map, y)).value >= Field.EMPTY.value) {

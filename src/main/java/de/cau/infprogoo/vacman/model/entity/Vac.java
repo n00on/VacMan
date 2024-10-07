@@ -2,7 +2,7 @@ package de.cau.infprogoo.vacman.model.entity;
 
 import de.cau.infprogoo.vacman.model.Direction;
 import de.cau.infprogoo.vacman.model.Field;
-import de.cau.infprogoo.vacman.model.Map;
+import de.cau.infprogoo.vacman.model.VacMap;
 import de.cau.infprogoo.vacman.model.VacManModel;
 
 /**
@@ -33,7 +33,7 @@ public class Vac extends Entity {
     @Override
     public void update() {
 
-        Map map = model.getMap();
+        VacMap map = model.getMap();
         if (map.get(nextDir.nextX(map, getX()), nextDir.nextY(map, getY())).value >= Field.EMPTY.value) {
             setDir(nextDir);
         }
