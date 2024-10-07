@@ -39,8 +39,12 @@ public class VacMan extends GraphicsProgram {
 	}
 
 	void tryAddLightHouseView(VacManModel model) {
-		String username = System.getenv("username");
-		String token = System.getenv("token");
+		String username = System.getenv("LH_USERNAME");
+		String token = System.getenv("LH_TOKEN");
+		if (token == null || username == null) {
+			logger.warn("Missing credentials for Jighthouse connection.");
+			return;
+		}
 		try {
 			LighthouseView lighthouse = new LighthouseView(model, username, token);
 			model.addView(lighthouse);

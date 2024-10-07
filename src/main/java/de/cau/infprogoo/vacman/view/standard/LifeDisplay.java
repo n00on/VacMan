@@ -5,7 +5,7 @@ import acm.graphics.GImage;
 import de.cau.infprogoo.vacman.model.VacManModel;
 
 class LifeDisplay extends GCompound {
-    private static final String IMAGE_PATH = "vacman/vacmanRight";
+    private static final String IMAGE_PATH = "vacman/vacmanRIGHT";
     private final GImage[] lives = {new VacImage(IMAGE_PATH), new VacImage(IMAGE_PATH), new VacImage(IMAGE_PATH)};
     private byte lifeCount = 3;
 
