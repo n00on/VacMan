@@ -16,7 +16,7 @@ public class BlueVirus extends Virus {
      */
     @Override
     void update() {
-        Virus blinky = model.getVirus()[0];
+        Virus blinky = model.getViruses()[0];
         Vac vacMan = model.getVacMan();
         int xDiff = vacMan.getX() + vacMan.getDir().x * 2 - blinky.getX();
         int yDiff = vacMan.getY() + vacMan.getDir().y * 2 - blinky.getY();

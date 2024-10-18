@@ -12,4 +12,6 @@ public interface VMView {
     void update(double ms);
 
     void reset();
+
+    void noUpdate();
 }

@@ -22,7 +22,7 @@ public class VacManModel {
      * Entities and Map.
      */
     private Vac vacMan;
-    private final Virus[] virus;
+    private final Virus[] viruses;
     private VacMap map;
 
     /**
@@ -40,7 +40,7 @@ public class VacManModel {
     public VacManModel() {
         initMap();
         vacMan = new Vac(this);
-        this.virus = new Virus[]{new FollowVirus(this), new PredictVirus(this), new BlueVirus(this),
+        this.viruses = new Virus[]{new FollowVirus(this), new PredictVirus(this), new BlueVirus(this),
                 new DistanceVirus(this)};
     }
 
@@ -50,6 +50,9 @@ public class VacManModel {
     public void run() {
         while (true) {
             if (paused) {
+                for (VMView view : views) {
+                    view.noUpdate();
+                }
                 JTFTools.pause(msPerUpdate);
             } else {
                 double startTime = System.nanoTime() / 1e6;
@@ -74,8 +77,8 @@ public class VacManModel {
         return vacMan;
     }
 
-    public Virus[] getVirus() {
-        return virus;
+    public Virus[] getViruses() {
+        return viruses;
     }
 
     public int getScore() {
@@ -124,7 +127,7 @@ public class VacManModel {
         }
 
         vacMan.update();
-        Virus.updateAll(virus);
+        Virus.updateAll(viruses);
         map.update(vacMan.getX(), vacMan.getY());
 
         if (map.getDotCounter() == 0) {
@@ -134,7 +137,7 @@ public class VacManModel {
 
     private void reset() {
         vacMan.reset();
-        Virus.resetAll(virus);
+        Virus.resetAll(viruses);
 
         if (newLevel) {
             level++;

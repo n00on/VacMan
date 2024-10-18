@@ -37,6 +37,8 @@ public class LighthouseView implements VMView {
             jighthouse.sendFrame(toBytes(toPixels(model.getMap())));
         } catch (Exception e) {
             logger.error("Connection failed: ", e);
+            jighthouse.stop();
+            jighthouse.start();
         }
     }
 
@@ -57,7 +59,7 @@ public class LighthouseView implements VMView {
         // add Vac
         pixels[model.getVacMan().getY()][model.getVacMan().getX()] = new Colour(-1, -1, 0); // yellow
         // add Virus
-        Virus[] virus = model.getVirus();
+        Virus[] virus = model.getViruses();
         for (int i = 0; i < virus.length; i++) {
             if (virus[i].isFrightened() && !(Virus.getFrightCounter() < 7 && Virus.getFrightCounter() % 2 == 0)) {
                 pixels[virus[i].getY()][virus[i].getX()] = new Colour(0, -1, -1); // cyan
@@ -75,8 +77,8 @@ public class LighthouseView implements VMView {
         // send(...) method.
         byte[] bytes = new byte[ROWS * COLUMNS * 3];
         int k = 0;
-        for (int x = 0; x < COLUMNS; x++) {
-            for (int y = 0; y < ROWS; y++) {
+        for (int y = 0; y < ROWS; y++) {
+            for (int x = 0; x < COLUMNS; x++) {
                 bytes[k] = pixels[y][x].getRed();
                 bytes[k + 1] = pixels[y][x].getGreen();
                 bytes[k + 2] = pixels[y][x].getBlue();
@@ -139,6 +141,11 @@ public class LighthouseView implements VMView {
     @Override
     public void reset() {
         // Ignore for lighthouse
+    }
+
+    @Override
+    public void noUpdate() {
+        update();
     }
 
 }

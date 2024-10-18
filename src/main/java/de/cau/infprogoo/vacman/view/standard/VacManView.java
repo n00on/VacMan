@@ -87,7 +87,7 @@ public class VacManView extends GCompound implements VMView {
     }
 
     public void drawEntities() {
-        Virus[] modelVirus = model.getVirus();
+        Virus[] modelVirus = model.getViruses();
         for (int i = 0; i < modelVirus.length; i++) {
             int x = FIELD_OFFSET / 2 + FIELD_SIZE * modelVirus[i].getX();
             int y = FIELD_OFFSET + FIELD_SIZE * modelVirus[i].getY();
@@ -102,7 +102,7 @@ public class VacManView extends GCompound implements VMView {
         scoreDisplay.setLabel("L" + model.getLevel() + " SCORE: " + model.getScore());
         lifeDisplay.update(model);
 
-        Virus[] modelVirus = model.getVirus();
+        Virus[] modelVirus = model.getViruses();
         for (int i = 0; i < modelVirus.length; i++) {
             this.virus[i].update(modelVirus[i]);
         }
@@ -134,7 +134,7 @@ public class VacManView extends GCompound implements VMView {
         double msPerFrame = ms / FIELD_SIZE;
 
         Vac vMan = model.getVacMan();
-        Virus[] modelVirus = model.getVirus();
+        Virus[] modelVirus = model.getViruses();
 
         for (int i = 0; i < FIELD_SIZE; i++) {
             vacMan.move(vMan.getDir().x, vMan.getDir().y);
@@ -145,6 +145,10 @@ public class VacManView extends GCompound implements VMView {
             }
             JTFTools.pause(msPerFrame);
         }
+    }
+
+    public void noUpdate() {
+        // Do nothing
     }
 
 }
