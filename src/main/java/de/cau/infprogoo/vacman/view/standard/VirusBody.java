@@ -39,8 +39,7 @@ class VirusBody extends GCompound {
                 isEaten = false;
                 isFrightened = false;
             }
-        }
-        if (virus.isFrightened() && Virus.getFrightCounter() < 7 && Virus.getFrightCounter() % 2 == 1) {
+        } else if (virus.isFrightened() && Virus.getFrightCounter() < 7 && Virus.getFrightCounter() % 2 == 1) {
             remove(fright);
             add(skin);
             isFrightened = false;

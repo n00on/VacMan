@@ -45,3 +45,14 @@ To run the game locally just run:
 The game automatically tries to connect to the Lighthouse
 using the environment variables `LH_USERNAME` and `LH_TOKEN`.  
 Run the game with these set to play on the Lighthouse.
+
+### Controls
+
+Use the **arrow keys** or **WASD** to move VacMan.  
+Use **space** to pause.  
+Use **R** to restart/reset.
+
+## Notes
+
+The viruses behave similar to the according ghosts in PAC-MAN.  
+The game over screen might just be a map which is paused by default ;)
